@@ -3,6 +3,8 @@ import { hadithRepository } from "@/src/features/hadith/repository";
 import Link from "next/link";
 import { Search, BookOpen } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default function HadithPage() {
   const collections = hadithRepository.getCollections();
 

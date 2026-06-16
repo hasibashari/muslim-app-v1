@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: 'A feature-based Next.js application containing Quran, Hadith, Dua, and Dhikr reading experiences.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${amiri.variable}`}>

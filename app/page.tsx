@@ -5,6 +5,8 @@ import { quranRepository } from "@/src/features/quran/repository";
 import { duaRepository } from "@/src/features/dua/repository";
 import { dhikrRepository } from "@/src/features/dhikr/repository";
 
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const recentSurahs = quranRepository.getAllSurahs().slice(0, 3);
   const morningDua = duaRepository.getAllDuas()[0];
@@ -54,8 +56,8 @@ export default function Home() {
               <p className="text-xs font-bold text-[#2D5A43] uppercase mb-1">Current Dhikr</p>
               <p className="text-lg font-bold text-[#1A3A2A]">{currentDhikr?.title || 'SubhanAllah'}</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-white border-2 border-[#2D5A43] flex items-center justify-center text-[#2D5A43] font-black shrink-0">
-              {currentDhikr?.count || 33}
+            <div className="h-12 px-4 rounded-full bg-white border-2 border-[#2D5A43] flex items-center justify-center text-[#2D5A43] font-bold shrink-0 text-xs text-center border-dashed">
+              {currentDhikr?.category || 'Daily'}
             </div>
           </div>
         </div>

@@ -3,6 +3,8 @@ import { quranRepository } from "@/src/features/quran/repository";
 import Link from "next/link";
 import { Search } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default function QuranPage() {
   const surahs = quranRepository.getAllSurahs();
 
