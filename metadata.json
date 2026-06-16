@@ -1,0 +1,8 @@
+{
+  "name": "Modern Muslim App",
+  "description": "A feature-based Next.js application containing Quran, Hadith, Dua, and Dhikr reading experiences optimized for all devices.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
