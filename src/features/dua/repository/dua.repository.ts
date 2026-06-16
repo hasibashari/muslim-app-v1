@@ -11,5 +11,8 @@ export const duaRepository = {
   },
   getDuasByCategory: (category: string): Dua[] => {
     return db.prepare('SELECT * FROM duas WHERE category = ?').all(category) as Dua[];
+  },
+  getDuaById: (id: number): Dua | undefined => {
+    return db.prepare('SELECT * FROM duas WHERE id = ?').get(id) as Dua | undefined;
   }
 };

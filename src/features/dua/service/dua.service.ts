@@ -12,5 +12,9 @@ export const duaService = {
     const trimmed = category.trim();
     if (!trimmed) return [];
     return duaRepository.getDuasByCategory(trimmed);
+  },
+  getDuaById: (id: number): Dua | undefined => {
+    if (isNaN(id) || id <= 0) return undefined;
+    return duaRepository.getDuaById(id);
   }
 };
