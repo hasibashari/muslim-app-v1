@@ -25,7 +25,7 @@ export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
         try {
           const parsed = JSON.parse(localData) as any[];
           return parsed.some((b) => b.item_type === "quran" && b.item_id === itemId);
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     return false;
@@ -94,15 +94,14 @@ export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
       </Link>
 
       {/* Surah Header Card */}
-      <section className="bg-gradient-to-br from-[#2D5A43] to-[#1A3A2A] rounded-[2.5rem] p-10 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-lg shadow-[#2D5A43]/20 border border-[#2D5A43]">
+      <section className="bg-gradient-to-br from-[#2D5A43] to-[#1A3A2A] rounded-2xl p-10 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-lg shadow-[#2D5A43]/20 border border-[#2D5A43]">
         {/* Bookmark Button */}
         <button
           onClick={toggleSurahBookmark}
-          className={`absolute top-6 right-6 p-3 rounded-2xl transition-all cursor-pointer backdrop-blur-md shadow-sm border ${
-            isBookmarked 
-              ? "bg-white text-[#2D5A43] border-white" 
+          className={`absolute top-6 right-6 p-3 rounded-2xl transition-all cursor-pointer backdrop-blur-md shadow-sm border ${isBookmarked
+              ? "bg-white text-[#2D5A43] border-white"
               : "bg-white/10 text-white hover:bg-white/20 border-white/20"
-          }`}
+            }`}
           title={isBookmarked ? "Hapus Bookmark Surah" : "Simpan Bookmark Surah"}
         >
           {isBookmarked ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}

@@ -17,7 +17,7 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
     if (raw) {
       try {
         recentIds = JSON.parse(raw);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     let result: Surah[] = [];
@@ -26,7 +26,7 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
       const matches = recentIds
         .map((id) => allSurahs.find((s) => s.id === id))
         .filter((s): s is Surah => !!s);
-      
+
       // If we don't have 3 recent surahs yet, fill with first ones in the list
       if (matches.length < 3) {
         const remaining = allSurahs.filter((s) => !recentIds.includes(s.id));
@@ -47,9 +47,9 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
   return (
     <div className="bg-white rounded-3xl border border-[#E9E3D8] p-2">
       {recentSurahs.map((s) => (
-        <Link 
-          href={`/quran/${s.id}`} 
-          key={s.id} 
+        <Link
+          href={`/quran/${s.id}`}
+          key={s.id}
           className="flex items-center gap-4 p-3 border-b border-slate-50 last:border-none hover:bg-[#FBF9F4] rounded-2xl transition-colors cursor-pointer"
         >
           <div className="w-10 h-10 rounded-xl bg-[#FDFCF8] border border-[#E9E3D8] flex items-center justify-center font-bold text-slate-400 text-sm shrink-0">

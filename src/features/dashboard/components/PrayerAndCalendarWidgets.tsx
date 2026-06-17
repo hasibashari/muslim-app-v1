@@ -8,11 +8,11 @@ export function PrayerAndCalendarWidgets() {
   const [currentTime, setCurrentTime] = useState("");
   const [hijriDate, setHijriDate] = useState("Loading...");
   const [hijriYear, setHijriYear] = useState("");
-  
+
   // Default coordinates: Jakarta
   const [coords, setCoords] = useState({ latitude: -6.2088, longitude: 106.8456 });
   const [locationName, setLocationName] = useState("Jakarta");
-  
+
   // 1. Get browser geolocation and update coordinates
   useEffect(() => {
     if (typeof window !== "undefined" && navigator.geolocation) {
@@ -35,7 +35,7 @@ export function PrayerAndCalendarWidgets() {
   useEffect(() => {
     const updateTimeAndDate = () => {
       const now = new Date();
-      
+
       // Time string format "HH:MM"
       const hh = String(now.getHours()).padStart(2, "0");
       const mm = String(now.getMinutes()).padStart(2, "0");
@@ -92,7 +92,7 @@ export function PrayerAndCalendarWidgets() {
   return (
     <>
       {/* Prayer Time Widget */}
-      <div 
+      <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
         title={`Jadwal shalat hari ini untuk ${locationName}`}
       >
@@ -107,7 +107,7 @@ export function PrayerAndCalendarWidgets() {
       </div>
 
       {/* Hijri Calendar Widget */}
-      <div 
+      <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
         title="Tanggal Hijriah hari ini"
       >

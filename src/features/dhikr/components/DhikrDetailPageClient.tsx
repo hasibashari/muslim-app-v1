@@ -52,7 +52,7 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
               bookmarked[b.item_id] = true;
             }
           });
-        } catch (e) {}
+        } catch (e) { }
       }
       const timer = setTimeout(() => {
         setBookmarkedDhikrs(bookmarked);
@@ -60,6 +60,13 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
       return () => clearTimeout(timer);
     }
   }, [status, session?.user?.id, category]);
+
+  // Track last read Dhikr Category
+  useEffect(() => {
+    if (category) {
+      localStorage.setItem("noor_last_read_dhikr_category", category);
+    }
+  }, [category]);
 
   // 2. Toggle Dhikr bookmark
   const handleToggleBookmark = async (dhikr: Dhikr) => {
@@ -141,11 +148,10 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
                 {/* Bookmark Button */}
                 <button
                   onClick={() => handleToggleBookmark(dhikr)}
-                  className={`absolute top-6 right-6 p-2 rounded-xl transition-colors cursor-pointer border ${
-                    isBookmarked 
-                      ? "text-[#2D5A43] bg-emerald-50 border-emerald-100" 
+                  className={`absolute top-6 right-6 p-2 rounded-xl transition-colors cursor-pointer border ${isBookmarked
+                      ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
                       : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
-                  }`}
+                    }`}
                   title={isBookmarked ? "Hapus Bookmark Dzikir" : "Simpan Bookmark Dzikir"}
                 >
                   {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
