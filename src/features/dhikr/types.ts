@@ -5,4 +5,7 @@ export interface Dhikr {
   text_arabic: string;
   text_translation: string;
   reference: string | null;
+  latin: string | null;
+  read: string | null;
+  benefit: string | null;
 }

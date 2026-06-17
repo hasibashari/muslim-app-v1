@@ -60,7 +60,10 @@ export function getDb(): Database.Database {
       title TEXT NOT NULL,
       text_arabic TEXT NOT NULL,
       text_translation TEXT NOT NULL,
-      reference TEXT
+      reference TEXT,
+      latin TEXT,
+      read TEXT,
+      benefit TEXT
     );
   `);
 
