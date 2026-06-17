@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, Sparkles, RefreshCw } from "lucide-react";
+import { motion } from "motion/react";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home", exact: true },
@@ -37,14 +38,19 @@ export function BottomNav() {
                 : "text-slate-400 hover:text-[#2D5A43]"
             }`}
           >
-            <div
-              className={`w-8 h-8 flex items-center justify-center rounded-xl transition-all duration-150 ${
-                active ? "bg-[#2D5A43]/10" : ""
-              }`}
-            >
+            <div className="w-8 h-8 flex items-center justify-center rounded-xl relative">
+              {active && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute inset-0 bg-[#2D5A43]/10 rounded-xl"
+                />
+              )}
               <Icon
                 size={20}
                 strokeWidth={active ? 2.5 : 1.8}
+                className="relative z-10"
               />
             </div>
             <span

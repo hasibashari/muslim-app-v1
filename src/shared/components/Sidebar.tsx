@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
+import { motion } from "motion/react";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home", exact: true },
@@ -39,14 +40,20 @@ export function Sidebar() {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-150 ${
-                  active
-                    ? "bg-[#2D5A43] text-white shadow-md shadow-[#2D5A43]/20"
-                    : "text-slate-500 hover:bg-[#F0F4F2] hover:text-[#2D5A43]"
-                }`}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl font-semibold relative transition-colors duration-150 group cursor-pointer"
               >
-                <Icon size={20} />
-                {label}
+                {active && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 bg-[#2D5A43] rounded-xl shadow-md shadow-[#2D5A43]/20"
+                  />
+                )}
+                <Icon size={20} className={`relative z-10 ${active ? "text-white" : "text-slate-500 group-hover:text-[#2D5A43] transition-colors"}`} />
+                <span className={`relative z-10 ${active ? "text-white" : "text-slate-500 group-hover:text-[#2D5A43] transition-colors"}`}>
+                  {label}
+                </span>
               </Link>
             );
           })}

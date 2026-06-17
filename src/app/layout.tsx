@@ -6,6 +6,8 @@ import { TopBar } from "@/src/shared/components/TopBar";
 import { BottomNav } from "@/src/shared/components/BottomNav";
 import { SessionProviderWrapper } from "@/src/shared/components/SessionProviderWrapper";
 import { InstallPrompt } from "@/src/shared/components/InstallPrompt";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const amiri = Amiri({ subsets: ['arabic', 'latin'], weight: ['400', '700'], variable: '--font-serif' });
@@ -66,6 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           {/* PWA Install Prompt */}
           <InstallPrompt />
+          <SpeedInsights />
         </SessionProviderWrapper>
       </body>
     </html>
