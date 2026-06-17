@@ -27,6 +27,7 @@ export function getDb(): Database.Database {
       verse_number INTEGER NOT NULL,
       text_arabic TEXT NOT NULL,
       text_translation TEXT NOT NULL,
+      footnotes TEXT,
       FOREIGN KEY(surah_id) REFERENCES surahs(id)
     );
 
@@ -103,14 +104,14 @@ export function getDb(): Database.Database {
     insertSurah.run(18, 'Al-Kahf', 'الكهف', 'The Cave', 110, 'makkah');
 
     // Seed Verses
-    const insertVerse = db.prepare('INSERT INTO verses (surah_id, verse_number, text_arabic, text_translation) VALUES (?, ?, ?, ?)');
-    insertVerse.run(1, 1, 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'In the name of Allah, the Entirely Merciful, the Especially Merciful.');
-    insertVerse.run(1, 2, 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', '[All] praise is [due] to Allah, Lord of the worlds -');
-    insertVerse.run(1, 3, 'الرَّحْمَٰنِ الرَّحِيمِ', 'The Entirely Merciful, the Especially Merciful,');
-    insertVerse.run(1, 4, 'مَالِكِ يَوْمِ الدِّينِ', 'Sovereign of the Day of Recompense.');
-    insertVerse.run(1, 5, 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', 'It is You we worship and You we ask for help.');
-    insertVerse.run(1, 6, 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', 'Guide us to the straight path -');
-    insertVerse.run(1, 7, 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ', 'The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.');
+    const insertVerse = db.prepare('INSERT INTO verses (surah_id, verse_number, text_arabic, text_translation, footnotes) VALUES (?, ?, ?, ?, ?)');
+    insertVerse.run(1, 1, 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ', 'In the name of Allah, the Entirely Merciful, the Especially Merciful.', null);
+    insertVerse.run(1, 2, 'الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ', '[All] praise is [due] to Allah, Lord of the worlds -', null);
+    insertVerse.run(1, 3, 'الرَّحْمَٰنِ الرَّحِيمِ', 'The Entirely Merciful, the Especially Merciful,', null);
+    insertVerse.run(1, 4, 'مَالِكِ يَوْمِ الدِّينِ', 'Sovereign of the Day of Recompense.', null);
+    insertVerse.run(1, 5, 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', 'It is You we worship and You we ask for help.', null);
+    insertVerse.run(1, 6, 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', 'Guide us to the straight path -', null);
+    insertVerse.run(1, 7, 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ', 'The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.', null);
 
     // Seed Hadith Collections
     const insertCollection = db.prepare('INSERT INTO hadith_collections (id, name, total_hadith) VALUES (?, ?, ?)');

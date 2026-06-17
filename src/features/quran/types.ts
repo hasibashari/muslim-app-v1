@@ -13,4 +13,5 @@ export interface Verse {
   verse_number: number;
   text_arabic: string;
   text_translation: string;
+  footnotes?: string | null;
 }

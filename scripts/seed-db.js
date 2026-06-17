@@ -29,6 +29,7 @@ db.exec(`
     verse_number INTEGER NOT NULL,
     text_arabic TEXT NOT NULL,
     text_translation TEXT NOT NULL,
+    footnotes TEXT,
     FOREIGN KEY(surah_id) REFERENCES surahs(id)
   );
 
@@ -86,8 +87,8 @@ const insertSurah = db.prepare(`
 `);
 
 const insertVerse = db.prepare(`
-  INSERT INTO verses (surah_id, verse_number, text_arabic, text_translation)
-  VALUES (?, ?, ?, ?)
+  INSERT INTO verses (surah_id, verse_number, text_arabic, text_translation, footnotes)
+  VALUES (?, ?, ?, ?, ?)
 `);
 
 db.transaction(() => {
@@ -110,7 +111,8 @@ db.transaction(() => {
           surah.id,
           verse.ayah,
           verse.arabic,
-          verse.translation
+          verse.translation,
+          verse.footnotes || null
         );
       }
     } else {

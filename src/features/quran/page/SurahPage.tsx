@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LastReadTracker } from "@/src/features/quran/components/LastReadTracker";
+import { VersesList } from "../components/VersesList";
 
 export default async function SurahPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -42,31 +43,7 @@ export default async function SurahPage({ params }: { params: Promise<{ id: stri
       </section>
 
       {/* Verses List */}
-      <div className="flex flex-col gap-8 mt-6">
-        {verses.map((verse) => (
-          <div key={verse.id} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm">
-            <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
-
-            <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
-              <div 
-                className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
-                style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
-              >
-                {verse.verse_number}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-8">
-              <p className="text-3xl md:text-4xl font-serif text-right leading-loose text-[#1A3A2A]" dir="rtl">
-                {verse.text_arabic}
-              </p>
-              <p className="text-base md:text-lg text-slate-600 leading-relaxed">
-                {verse.text_translation}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <VersesList verses={verses} />
     </div>
   );
 }
