@@ -41,30 +41,24 @@ export default async function DuaPage({ searchParams }: PageProps) {
         </button>
       </form>
 
-      {/* Grid List of Duas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {/* List of Duas */}
+      <div className="flex flex-col gap-4">
         {filteredDuas.map((dua) => (
           <Link
             href={`/dua/detail/${dua.id}`}
             key={dua.id}
-            className="bg-white rounded-3xl border border-[#E9E3D8] p-6 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer"
+            className="bg-white rounded-2xl border border-[#E9E3D8] p-5 flex items-center gap-4 hover:bg-[#FBF9F4] transition-colors group cursor-pointer"
           >
-            <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
-              <Sparkles size={24} />
+            <div className="w-10 h-10 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform shrink-0">
+              <Sparkles size={20} />
             </div>
-            <div className="mt-2 text-[#1A3A2A]">
-              <h2 className="text-xl font-bold line-clamp-1">{dua.title}</h2>
-              <p className="text-xs font-semibold text-[#2D5A43] tracking-wide uppercase mt-1">
-                {dua.category}
-              </p>
-              <p className="text-sm text-slate-500 line-clamp-2 mt-2 leading-relaxed">
-                {dua.text_translation}
-              </p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold text-[#1A3A2A] truncate group-hover:text-[#2D5A43] transition-colors">{dua.title}</h2>
             </div>
           </Link>
         ))}
         {filteredDuas.length === 0 && (
-          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">
+          <div className="p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">
             No Duas found matching your search.
           </div>
         )}

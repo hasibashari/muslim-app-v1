@@ -65,6 +65,10 @@ export function getDb(): Database.Database {
       read TEXT,
       benefit TEXT
     );
+
+    CREATE INDEX IF NOT EXISTS idx_verses_surah_id ON verses(surah_id);
+    CREATE INDEX IF NOT EXISTS idx_hadiths_collection_id ON hadiths(collection_id);
+    CREATE INDEX IF NOT EXISTS idx_dhikrs_category ON dhikrs(category);
   `);
 
   // Seed initial data if empty

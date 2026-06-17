@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-export default async function DhikrCategoryPage({ params }: { params: Promise<{ category: string }> }) {
+export default async function DhikrDetailPage({ params }: { params: Promise<{ category: string }> }) {
   const resolvedParams = await params;
 
   // Need to get exactly the right category name based on lowercased match.
@@ -28,7 +28,7 @@ export default async function DhikrCategoryPage({ params }: { params: Promise<{ 
         <p className="text-slate-500 font-semibold uppercase tracking-widest text-sm">{dhikrs.length} Remembrances</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+      <div className="flex flex-col gap-6 mt-2">
         {dhikrs.map((dhikr) => (
           <div key={dhikr.id} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between">
             <div className="flex flex-col gap-6">
