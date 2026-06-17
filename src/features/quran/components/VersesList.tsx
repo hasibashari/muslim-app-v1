@@ -89,7 +89,7 @@ export function VersesList({ verses }: VersesListProps) {
                   <span className="text-[10px] font-bold text-[#2D5A43] uppercase tracking-wider block">
                     Catatan Kaki (Footnote)
                   </span>
-                  <p className="leading-relaxed text-xs md:text-sm text-slate-700">
+                  <p className="leading-relaxed text-xs md:text-sm text-slate-700 whitespace-pre-line">
                     {verse.footnotes}
                   </p>
                 </div>
