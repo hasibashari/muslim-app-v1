@@ -69,6 +69,27 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_verses_surah_id ON verses(surah_id);
     CREATE INDEX IF NOT EXISTS idx_hadiths_collection_id ON hadiths(collection_id);
     CREATE INDEX IF NOT EXISTS idx_dhikrs_category ON dhikrs(category);
+
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT,
+      avatar_url TEXT,
+      google_id TEXT UNIQUE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS user_bookmarks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      item_type TEXT NOT NULL,
+      item_id TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(user_id, item_type, item_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_user_bookmarks_user_id ON user_bookmarks(user_id);
   `);
 
   // Seed initial data if empty

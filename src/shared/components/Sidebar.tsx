@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
+import { Home, BookOpen, ScrollText, Sparkles, RefreshCw, User } from "lucide-react";
 
 export function Sidebar() {
   return (
@@ -32,6 +32,10 @@ export function Sidebar() {
           <Link href="/dhikr" className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-[#F0F4F2] hover:text-[#2D5A43] rounded-lg font-semibold transition-colors">
             <RefreshCw size={20} />
             Dhikr
+          </Link>
+          <Link href="/profile" className="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-[#F0F4F2] hover:text-[#2D5A43] rounded-lg font-semibold transition-colors">
+            <User size={20} />
+            Profile
           </Link>
         </nav>
       </div>
