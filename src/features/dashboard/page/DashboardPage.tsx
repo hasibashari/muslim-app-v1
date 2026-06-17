@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { quranService } from "@/src/features/quran/service/quran.service";
-import { duaService } from "@/src/features/dua/service/dua.service";
 import { dhikrService } from "@/src/features/dhikr/service/dhikr.service";
 import { cookies } from "next/headers";
 import { HeroSection } from "../components/HeroSection";
 import { RecentSurahsList } from "../components/RecentSurahsList";
 import { PrayerAndCalendarWidgets } from "../components/PrayerAndCalendarWidgets";
 import { CurrentDhikrWidget } from "../components/CurrentDhikrWidget";
-import { LastReadDuaWidget } from "../components/LastReadDuaWidget";
+import { TasbihWidget } from "../components/TasbihWidget";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -20,7 +19,6 @@ export default async function DashboardPage() {
   }
 
   const allSurahs = quranService.getAllSurahs();
-  const allDuas = duaService.getAllDuas();
   const allDhikrs = dhikrService.getAllDhikrs();
 
   return (
@@ -45,7 +43,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="lg:col-span-6">
-        <LastReadDuaWidget allDuas={allDuas} />
+        <TasbihWidget />
       </div>
     </div>
   );

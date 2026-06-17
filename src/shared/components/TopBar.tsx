@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSession } from "@/src/features/auth/hooks";
 import { SearchModal } from "@/src/shared/components/SearchModal";
 
@@ -40,12 +41,13 @@ export function TopBar() {
             aria-label="Profile"
           >
             {session?.user?.image ? (
-              <img
+              <Image
                 src={session.user.image}
                 alt={session.user.name || "Avatar"}
                 width={36}
                 height={36}
                 className="w-full h-full object-cover"
+                unoptimized
                 referrerPolicy="no-referrer"
               />
             ) : (

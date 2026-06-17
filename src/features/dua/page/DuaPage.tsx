@@ -1,5 +1,5 @@
 import { duaService } from "@/src/features/dua/service/dua.service";
-import { Search, Sparkles, ChevronLeft, ChevronRight, FolderOpen, ArrowLeft } from "lucide-react";
+import { Sparkles, ChevronLeft, ChevronRight, FolderOpen, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 interface PageProps {
@@ -43,18 +43,6 @@ export default async function DuaPage({ searchParams }: PageProps) {
           <p className="text-slate-500">Select a category to view authentic supplications from Quran and Sunnah.</p>
         </div>
 
-        {/* Global Search Form */}
-        <form method="GET" action="/dua" className="relative w-full mb-2">
-          <input
-            type="text"
-            name="q"
-            placeholder="Search Duas..."
-            className="w-full bg-white border border-[#E9E3D8] rounded-full py-4 pl-14 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A43] shadow-sm"
-          />
-          <button type="submit" className="absolute left-5 top-4 text-slate-400">
-            <Search size={20} />
-          </button>
-        </form>
 
         {/* 2-Column Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
@@ -66,7 +54,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
                 key={cat}
                 className="bg-white rounded-3xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform w-fit">
+                <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
                   <FolderOpen size={24} />
                 </div>
                 <div className="mt-2 text-[#1A3A2A]">
@@ -112,20 +100,6 @@ export default async function DuaPage({ searchParams }: PageProps) {
         </p>
       </div>
 
-      {/* Search form within active filter */}
-      <form method="GET" action="/dua" className="relative w-full mb-2">
-        {category && <input type="hidden" name="category" value={category} />}
-        <input
-          type="text"
-          name="q"
-          defaultValue={query}
-          placeholder={category ? `Search in ${category}...` : "Search Duas..."}
-          className="w-full bg-white border border-[#E9E3D8] rounded-full py-4 pl-14 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D5A43] shadow-sm"
-        />
-        <button type="submit" className="absolute left-5 top-4 text-slate-400">
-          <Search size={20} />
-        </button>
-      </form>
 
       {/* List of Duas */}
       <div className="flex flex-col gap-4">

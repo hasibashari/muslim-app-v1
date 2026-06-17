@@ -33,9 +33,9 @@ export function CurrentDhikrWidget({ allDhikrs }: CurrentDhikrWidgetProps) {
   if (!currentDhikr) return null;
 
   return (
-    <Link 
+    <Link
       href={`/dhikr/${currentDhikr.category.toLowerCase()}`}
-      className="col-span-2 bg-[#F5F1EA] p-6 rounded-3xl border border-[#E9E3D8] flex items-center justify-between hover:bg-[#E9E3D8]/40 hover:border-[#2D5A43]/30 transition-all cursor-pointer block"
+      className="col-span-2 bg-[#F5F1EA] p-6 rounded-2xl border border-[#E9E3D8] flex items-center justify-between hover:bg-[#E9E3D8]/40 hover:border-[#2D5A43]/30 transition-all cursor-pointer block"
     >
       <div>
         <p className="text-xs font-bold text-[#2D5A43] uppercase mb-1">Current Dhikr</p>

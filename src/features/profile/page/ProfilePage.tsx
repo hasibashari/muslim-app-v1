@@ -3,6 +3,7 @@
 import { useSession, signIn, signOut } from "@/src/features/auth/hooks";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaGoogle } from "react-icons/fa";
 import { 
   User, 
@@ -237,10 +238,13 @@ export default function ProfilePage() {
               {/* Profile Pic */}
               <div className="w-24 h-24 rounded-full border-4 border-white bg-[#E9E3D8] overflow-hidden shadow-md shrink-0 flex items-center justify-center">
                 {session?.user?.image ? (
-                  <img 
+                  <Image 
                     src={session.user.image} 
                     alt={session.user.name || "User"} 
                     className="w-full h-full object-cover"
+                    width={96}
+                    height={96}
+                    unoptimized
                     referrerPolicy="no-referrer"
                   />
                 ) : (

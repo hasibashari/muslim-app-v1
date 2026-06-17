@@ -93,7 +93,7 @@ export function PrayerAndCalendarWidgets() {
     <>
       {/* Prayer Time Widget */}
       <div
-        className="bg-white border border-[#E9E3D8] p-5 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
+        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
         title={`Jadwal shalat hari ini untuk ${locationName}`}
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
@@ -108,7 +108,7 @@ export function PrayerAndCalendarWidgets() {
 
       {/* Hijri Calendar Widget */}
       <div
-        className="bg-white border border-[#E9E3D8] p-5 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
+        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
         title="Tanggal Hijriah hari ini"
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">

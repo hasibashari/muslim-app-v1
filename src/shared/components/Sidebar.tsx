@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
 
@@ -25,7 +26,7 @@ export function Sidebar() {
       <div className="p-8">
         <Link href="/" className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-[#2D5A43] rounded-xl flex items-center justify-center overflow-hidden">
-            <img src="/icons/icon-96x96.png" alt="Noor" className="w-full h-full object-contain" />
+            <Image src="/icons/icon-96x96.png" alt="Noor" width={40} height={40} className="object-contain" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-[#1A3A2A]">Noor</h1>
         </Link>

@@ -26,7 +26,7 @@ export default async function DuaCategoryPage() {
               key={category}
               className="bg-white rounded-3xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
             >
-              <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform w-fit">
+              <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
                 <FolderOpen size={24} />
               </div>
               <div className="mt-2 text-[#1A3A2A]">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Download, X } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -63,10 +64,12 @@ export function InstallPrompt() {
         <div className="p-4 flex items-start gap-3">
           {/* Icon */}
           <div className="w-12 h-12 rounded-xl bg-[#2D5A43] flex items-center justify-center shrink-0 shadow-md shadow-[#2D5A43]/20">
-            <img
+            <Image
               src="/icons/icon-96x96.png"
               alt="Noor"
-              className="w-8 h-8 object-contain"
+              width={32}
+              height={32}
+              className="object-contain"
             />
           </div>
 
