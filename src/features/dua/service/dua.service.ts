@@ -1,12 +1,21 @@
 import { duaRepository } from '../repository/dua.repository';
 import { Dua } from '../types';
 
+let cachedDuas: Dua[] | null = null;
+let cachedCategories: string[] | null = null;
+
 export const duaService = {
   getAllDuas: (): Dua[] => {
-    return duaRepository.getAllDuas();
+    if (!cachedDuas) {
+      cachedDuas = duaRepository.getAllDuas();
+    }
+    return cachedDuas;
   },
   getCategories: (): string[] => {
-    return duaRepository.getCategories();
+    if (!cachedCategories) {
+      cachedCategories = duaRepository.getCategories();
+    }
+    return cachedCategories;
   },
   getDuasByCategory: (category: string): Dua[] => {
     const trimmed = category.trim();

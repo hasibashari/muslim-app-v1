@@ -4,6 +4,7 @@ import { ArrowLeft, FolderOpen } from "lucide-react";
 
 export default async function DuaCategoryPage() {
   const categories = duaService.getCategories();
+  const categoryCounts = duaService.getCategoryCounts();
 
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
@@ -19,7 +20,7 @@ export default async function DuaCategoryPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
         {categories.map((category) => {
-          const count = duaService.getDuasByCategory(category).length;
+          const count = categoryCounts[category] || 0;
           return (
             <Link
               href={`/dua?category=${encodeURIComponent(category)}`}

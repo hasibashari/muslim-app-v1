@@ -43,13 +43,14 @@ export default function ProfilePage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "quran" | "hadith" | "dua" | "dhikr">("all");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const uid = session?.user?.id;
 
   // 1. Fetch bookmarks from Firestore if logged in, otherwise from LocalStorage
   const fetchBookmarks = useCallback(async () => {
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
+    if (status === "authenticated" && uid && isConfigured) {
       try {
         setIsLoading(true);
-        const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
+        const bookmarksRef = collection(db, "users", uid, "bookmarks");
         const q = query(bookmarksRef, orderBy("created_at", "desc"));
         const querySnapshot = await getDocs(q);
         const fetchedBookmarks: Bookmark[] = [];
@@ -78,7 +79,7 @@ export default function ProfilePage() {
       }
       setIsLoading(false);
     }
-  }, [status, session]);
+  }, [status, uid]);
 
   useEffect(() => {
     if (status !== "loading") {
@@ -87,11 +88,10 @@ export default function ProfilePage() {
       }, 0);
       return () => clearTimeout(timer);
     }
-  }, [status, session, fetchBookmarks]);
+  }, [status, fetchBookmarks]);
 
   // 2. Sync Local Storage bookmarks to Firestore on login
   const handleSync = useCallback(async () => {
-    const uid = session?.user?.id;
     if (status !== "authenticated" || !uid || !isConfigured) return;
     
     const localData = localStorage.getItem("noor_bookmarks");
@@ -132,7 +132,7 @@ export default function ProfilePage() {
       setIsSyncing(false);
       setTimeout(() => setMessage(null), 5000);
     }
-  }, [status, session, fetchBookmarks]);
+  }, [status, uid, fetchBookmarks]);
 
   // Auto-sync on load if logged in and local bookmarks exist
   useEffect(() => {
@@ -146,10 +146,10 @@ export default function ProfilePage() {
 
   // 3. Delete bookmark
   const handleDeleteBookmark = async (item_type: string, item_id: string) => {
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
+    if (status === "authenticated" && uid && isConfigured) {
       try {
         const docId = `${item_type}_${item_id}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
+        const docRef = doc(db, "users", uid, "bookmarks", docId);
         await deleteDoc(docRef);
         setBookmarks(prev => prev.filter(b => !(b.item_type === item_type && b.item_id === item_id)));
       } catch (err) {
