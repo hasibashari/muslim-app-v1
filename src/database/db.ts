@@ -46,12 +46,13 @@ export function getDb(): Database.Database {
     );
 
     CREATE TABLE IF NOT EXISTS duas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category TEXT NOT NULL,
+      id INTEGER PRIMARY KEY,
+      category TEXT,
       title TEXT NOT NULL,
       text_arabic TEXT NOT NULL,
       text_translation TEXT NOT NULL,
-      reference TEXT
+      reference TEXT,
+      latin TEXT
     );
 
     CREATE TABLE IF NOT EXISTS dhikrs (
@@ -120,13 +121,39 @@ export function getDb(): Database.Database {
     const insertHadith = db.prepare('INSERT INTO hadiths (collection_id, hadith_number, text_arab, text_en) VALUES (?, ?, ?, ?)');
     insertHadith.run('bukhari', '1', 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ', 'The reward of deeds depends upon the intentions...');
     
-    // Seed Duas
-    const insertDua = db.prepare('INSERT INTO duas (category, title, text_arabic, text_translation, reference) VALUES (?, ?, ?, ?, ?)');
-    insertDua.run('Daily', 'Before Sleeping', 'بِاسْمِكَ رَبِّـي وَضَعْـتُ جَنْـبي، وَبِكَ أَرْفَعُـه', 'In Your name, my Lord, I lay my side down, and by You I raise it up...', 'Al-Bukhari 11/126');
-    insertDua.run('Daily', 'Waking Up', 'الْحَمْدُ للهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ', 'All praise is to Allah Who gave us life after He had caused us to die, and unto Him is the resurrection.', 'Al-Bukhari 11/113');
-    insertDua.run('Food and Drink', 'Before Eating', 'بِسْمِ اللَّهِ', 'In the name of Allah.', 'Abu Dawud 3/347');
-    insertDua.run('Food and Drink', 'After Eating', 'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ', 'All praise is to Allah Who has fed me this and provided it for me without any strength or power on my part.', 'Abu Dawud 4023');
-    insertDua.run('Travel', 'Boarding a Vehicle', 'سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ', 'Glory is to Him Who has provided this for us though we could never have had it by our efforts.', 'Abu Dawud 3/34');
+    // Seed Duas from public/doa.json if it exists
+    const doaJsonPath = path.join(process.cwd(), 'public', 'doa.json');
+    if (fs.existsSync(doaJsonPath)) {
+      const duasData = JSON.parse(fs.readFileSync(doaJsonPath, 'utf8'));
+      const insertDua = db.prepare('INSERT INTO duas (id, category, title, text_arabic, text_translation, reference, latin) VALUES (?, ?, ?, ?, ?, ?, ?)');
+      
+      const getDuaCategory = (title: string): string => {
+        const t = title.toLowerCase();
+        if (t.includes('tidur') || t.includes('bangun')) return 'Tidur & Bangun';
+        if (t.includes('wudhu') || t.includes('mandi') || t.includes('masjid') || t.includes('shalat') || t.includes('adzan')) return 'Bersuci & Shalat';
+        if (t.includes('makan') || t.includes('minum') || t.includes('kenyang') || t.includes('lapar')) return 'Makan & Minum';
+        if (t.includes('sakit') || t.includes('kematian') || t.includes('mati') || t.includes('jenazah') || t.includes('kubur')) return 'Kesehatan & Kematian';
+        if (t.includes('hujan') || t.includes('petir') || t.includes('angin') || t.includes('awan')) return 'Alam & Hujan';
+        if (t.includes('nikah') || t.includes('pengantin') || t.includes('jima') || t.includes('istri') || t.includes('suami')) return 'Pernikahan';
+        if (t.includes('keluar') || t.includes('masuk') || t.includes('jalan') || t.includes('kendaraan') || t.includes('safar') || t.includes('musafir')) return 'Perjalanan & Safar';
+        return 'Pilihan';
+      };
+
+      const transaction = db.transaction(() => {
+        for (const d of duasData) {
+          insertDua.run(
+            d.id,
+            getDuaCategory(d.title),
+            d.title,
+            d.arabic || '',
+            d.translation || '',
+            d.tentang || null,
+            d.latin || null
+          );
+        }
+      });
+      transaction();
+    }
 
     // Seed Dhikrs
     const insertDhikr = db.prepare('INSERT INTO dhikrs (category, title, text_arabic, text_translation, reference) VALUES (?, ?, ?, ?, ?)');

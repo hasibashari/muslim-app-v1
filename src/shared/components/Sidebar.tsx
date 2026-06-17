@@ -3,7 +3,7 @@ import { Home, BookOpen, ScrollText, Sparkles, RefreshCw, User } from "lucide-re
 
 export function Sidebar() {
   return (
-    <aside className="hidden md:flex w-64 bg-white border-r border-[#E9E3D8] flex-col h-full z-10 shrink-0">
+    <aside className="hidden md:flex w-64 bg-white border-r border-[#E9E3D8] flex-col h-full z-10 shrink-0 overflow-y-auto scrollbar-hide">
       <div className="p-8">
         <Link href="/" className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 bg-[#2D5A43] rounded-xl flex items-center justify-center text-white">

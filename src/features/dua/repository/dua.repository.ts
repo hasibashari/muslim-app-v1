@@ -14,5 +14,60 @@ export const duaRepository = {
   },
   getDuaById: (id: number): Dua | undefined => {
     return db.prepare('SELECT * FROM duas WHERE id = ?').get(id) as Dua | undefined;
+  },
+  getDuasPaginated: (page: number, limit: number, query?: string, category?: string): Dua[] => {
+    const offset = (page - 1) * limit;
+    
+    let sql = 'SELECT * FROM duas';
+    const params: any[] = [];
+    const conditions: string[] = [];
+
+    if (category && category.trim()) {
+      conditions.push('category = ?');
+      params.push(category.trim());
+    }
+
+    if (query && query.trim()) {
+      conditions.push('(title LIKE ? OR category LIKE ? OR text_translation LIKE ?)');
+      const sqlQuery = `%${query.trim()}%`;
+      params.push(sqlQuery, sqlQuery, sqlQuery);
+    }
+
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(limit, offset);
+
+    return db.prepare(sql).all(...params) as Dua[];
+  },
+  getDuasCount: (query?: string, category?: string): number => {
+    let sql = 'SELECT COUNT(*) as count FROM duas';
+    const params: any[] = [];
+    const conditions: string[] = [];
+
+    if (category && category.trim()) {
+      conditions.push('category = ?');
+      params.push(category.trim());
+    }
+
+    if (query && query.trim()) {
+      conditions.push('(title LIKE ? OR category LIKE ? OR text_translation LIKE ?)');
+      const sqlQuery = `%${query.trim()}%`;
+      params.push(sqlQuery, sqlQuery, sqlQuery);
+    }
+
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    const row = db.prepare(sql).get(...params) as { count: number };
+    return row.count;
+  },
+  getAdjacentDuas: (currentId: number): { prev?: { id: number; title: string }; next?: { id: number; title: string } } => {
+    const prev = db.prepare('SELECT id, title FROM duas WHERE id < ? ORDER BY id DESC LIMIT 1').get(currentId) as { id: number; title: string } | undefined;
+    const next = db.prepare('SELECT id, title FROM duas WHERE id > ? ORDER BY id ASC LIMIT 1').get(currentId) as { id: number; title: string } | undefined;
+    return { prev, next };
   }
 };

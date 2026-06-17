@@ -16,5 +16,16 @@ export const duaService = {
   getDuaById: (id: number): Dua | undefined => {
     if (isNaN(id) || id <= 0) return undefined;
     return duaRepository.getDuaById(id);
+  },
+  getDuasPaginated: (page: number, limit: number, query?: string, category?: string): { duas: Dua[]; total: number } => {
+    const sanitizedPage = Math.max(1, page);
+    const sanitizedLimit = Math.max(1, limit);
+    const duas = duaRepository.getDuasPaginated(sanitizedPage, sanitizedLimit, query, category);
+    const total = duaRepository.getDuasCount(query, category);
+    return { duas, total };
+  },
+  getAdjacentDuas: (id: number): { prev?: { id: number; title: string }; next?: { id: number; title: string } } => {
+    if (isNaN(id) || id <= 0) return {};
+    return duaRepository.getAdjacentDuas(id);
   }
 };

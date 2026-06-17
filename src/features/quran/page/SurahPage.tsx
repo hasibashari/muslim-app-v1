@@ -2,6 +2,7 @@ import { quranService } from "@/src/features/quran/service/quran.service";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { LastReadTracker } from "@/src/features/quran/components/LastReadTracker";
 
 export default async function SurahPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -15,6 +16,7 @@ export default async function SurahPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
+      <LastReadTracker surahId={surahId} surahName={surah.name_simple} />
       <Link href="/quran" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit">
         <ArrowLeft size={16} />
         Back to Surahs

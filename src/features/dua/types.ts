@@ -5,4 +5,5 @@ export interface Dua {
   text_arabic: string;
   text_translation: string;
   reference: string | null;
+  latin?: string | null;
 }
