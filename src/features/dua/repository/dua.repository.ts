@@ -69,5 +69,13 @@ export const duaRepository = {
     const prev = db.prepare('SELECT id, title FROM duas WHERE id < ? ORDER BY id DESC LIMIT 1').get(currentId) as { id: number; title: string } | undefined;
     const next = db.prepare('SELECT id, title FROM duas WHERE id > ? ORDER BY id ASC LIMIT 1').get(currentId) as { id: number; title: string } | undefined;
     return { prev, next };
-  }
+  },
+  getCategoryCounts: (): Record<string, number> => {
+    const rows = db.prepare('SELECT category, COUNT(*) as count FROM duas WHERE category IS NOT NULL GROUP BY category').all() as { category: string; count: number }[];
+    const counts: Record<string, number> = {};
+    rows.forEach(r => {
+      counts[r.category] = r.count;
+    });
+    return counts;
+   }
 };

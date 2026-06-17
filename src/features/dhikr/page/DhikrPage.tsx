@@ -4,6 +4,7 @@ import Link from "next/link";
 
 export default function DhikrPage() {
   const categories = dhikrService.getCategories();
+  const categoryCounts = dhikrService.getCategoryCounts();
 
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
@@ -30,7 +31,7 @@ export default function DhikrPage() {
             <div className="mt-2 text-[#1A3A2A]">
               <h2 className="text-xl font-bold">{category}</h2>
               <p className="text-sm font-medium text-[#2D5A43] tracking-wide uppercase mt-1">
-                {dhikrService.getDhikrsByCategory(category).length} Items
+                {categoryCounts[category] || 0} Items
               </p>
             </div>
             <div className="absolute right-[-20px] bottom-[-20px] opacity-5 text-[#2D5A43]">

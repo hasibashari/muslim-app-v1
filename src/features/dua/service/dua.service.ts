@@ -27,5 +27,8 @@ export const duaService = {
   getAdjacentDuas: (id: number): { prev?: { id: number; title: string }; next?: { id: number; title: string } } => {
     if (isNaN(id) || id <= 0) return {};
     return duaRepository.getAdjacentDuas(id);
+  },
+  getCategoryCounts: (): Record<string, number> => {
+    return duaRepository.getCategoryCounts();
   }
 };

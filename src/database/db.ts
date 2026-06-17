@@ -11,69 +11,73 @@ export function getDb(): Database.Database {
   const db = new Database(dbPath);
 
   // Create tables if they don't exist
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS surahs (
-      id INTEGER PRIMARY KEY,
-      name_simple TEXT NOT NULL,
-      name_arabic TEXT NOT NULL,
-      translated_name TEXT NOT NULL,
-      verses_count INTEGER NOT NULL,
-      revelation_place TEXT NOT NULL
-    );
+  const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='surahs'").get();
+  if (!tableCheck) {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS surahs (
+        id INTEGER PRIMARY KEY,
+        name_simple TEXT NOT NULL,
+        name_arabic TEXT NOT NULL,
+        translated_name TEXT NOT NULL,
+        verses_count INTEGER NOT NULL,
+        revelation_place TEXT NOT NULL
+      );
 
-    CREATE TABLE IF NOT EXISTS verses (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      surah_id INTEGER NOT NULL,
-      verse_number INTEGER NOT NULL,
-      text_arabic TEXT NOT NULL,
-      text_translation TEXT NOT NULL,
-      footnotes TEXT,
-      FOREIGN KEY(surah_id) REFERENCES surahs(id)
-    );
+      CREATE TABLE IF NOT EXISTS verses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        surah_id INTEGER NOT NULL,
+        verse_number INTEGER NOT NULL,
+        text_arabic TEXT NOT NULL,
+        text_translation TEXT NOT NULL,
+        footnotes TEXT,
+        FOREIGN KEY(surah_id) REFERENCES surahs(id)
+      );
 
-    CREATE TABLE IF NOT EXISTS hadith_collections (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      total_hadith INTEGER NOT NULL
-    );
+      CREATE TABLE IF NOT EXISTS hadith_collections (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        total_hadith INTEGER NOT NULL
+      );
 
-    CREATE TABLE IF NOT EXISTS hadiths (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      collection_id TEXT NOT NULL,
-      hadith_number TEXT NOT NULL,
-      text_arab TEXT NOT NULL,
-      text_en TEXT NOT NULL,
-      FOREIGN KEY(collection_id) REFERENCES hadith_collections(id)
-    );
+      CREATE TABLE IF NOT EXISTS hadiths (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        collection_id TEXT NOT NULL,
+        hadith_number TEXT NOT NULL,
+        text_arab TEXT NOT NULL,
+        text_en TEXT NOT NULL,
+        FOREIGN KEY(collection_id) REFERENCES hadith_collections(id)
+      );
 
-    CREATE TABLE IF NOT EXISTS duas (
-      id INTEGER PRIMARY KEY,
-      category TEXT,
-      title TEXT NOT NULL,
-      text_arabic TEXT NOT NULL,
-      text_translation TEXT NOT NULL,
-      reference TEXT,
-      latin TEXT
-    );
+      CREATE TABLE IF NOT EXISTS duas (
+        id INTEGER PRIMARY KEY,
+        category TEXT,
+        title TEXT NOT NULL,
+        text_arabic TEXT NOT NULL,
+        text_translation TEXT NOT NULL,
+        reference TEXT,
+        latin TEXT
+      );
 
-    CREATE TABLE IF NOT EXISTS dhikrs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category TEXT NOT NULL,
-      title TEXT NOT NULL,
-      text_arabic TEXT NOT NULL,
-      text_translation TEXT NOT NULL,
-      reference TEXT,
-      latin TEXT,
-      read TEXT,
-      benefit TEXT
-    );
+      CREATE TABLE IF NOT EXISTS dhikrs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        text_arabic TEXT NOT NULL,
+        text_translation TEXT NOT NULL,
+        reference TEXT,
+        latin TEXT,
+        read TEXT,
+        benefit TEXT
+      );
 
-    CREATE INDEX IF NOT EXISTS idx_verses_surah_id ON verses(surah_id);
-    CREATE INDEX IF NOT EXISTS idx_hadiths_collection_id ON hadiths(collection_id);
-    CREATE INDEX IF NOT EXISTS idx_dhikrs_category ON dhikrs(category);
+      CREATE INDEX IF NOT EXISTS idx_verses_surah_id ON verses(surah_id);
+      CREATE INDEX IF NOT EXISTS idx_hadiths_collection_id ON hadiths(collection_id);
+      CREATE INDEX IF NOT EXISTS idx_dhikrs_category ON dhikrs(category);
+    `);
+  }
 
-
-  `);
+  // Ensure index on duas(category) exists for optimization
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_duas_category ON duas(category);`);
 
   // Seed initial data if empty
   const surahCount = db.prepare('SELECT COUNT(*) as count FROM surahs').get() as { count: number };

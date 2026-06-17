@@ -11,5 +11,13 @@ export const dhikrRepository = {
   },
   getDhikrsByCategory: (category: string): Dhikr[] => {
     return db.prepare('SELECT * FROM dhikrs WHERE category = ?').all(category) as Dhikr[];
+  },
+  getCategoryCounts: (): Record<string, number> => {
+    const rows = db.prepare('SELECT category, COUNT(*) as count FROM dhikrs WHERE category IS NOT NULL GROUP BY category').all() as { category: string; count: number }[];
+    const counts: Record<string, number> = {};
+    rows.forEach(r => {
+      counts[r.category] = r.count;
+    });
+    return counts;
   }
 };

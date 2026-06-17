@@ -32,6 +32,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
   const limit = 10; // 10 supplications per page
 
   const categories = duaService.getCategories();
+  const categoryCounts = (!category && !query) ? duaService.getCategoryCounts() : {};
 
   // State A: Initial landing page with no category and no active search query
   if (!category && !query) {
@@ -58,7 +59,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
         {/* 2-Column Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
           {categories.map((cat) => {
-            const count = duaService.getDuasByCategory(cat).length;
+            const count = categoryCounts[cat] || 0;
             return (
               <Link
                 href={`/dua?category=${encodeURIComponent(cat)}`}

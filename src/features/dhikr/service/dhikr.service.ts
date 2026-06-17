@@ -12,5 +12,8 @@ export const dhikrService = {
     const trimmed = category.trim();
     if (!trimmed) return [];
     return dhikrRepository.getDhikrsByCategory(trimmed);
+  },
+  getCategoryCounts: (): Record<string, number> => {
+    return dhikrRepository.getCategoryCounts();
   }
 };

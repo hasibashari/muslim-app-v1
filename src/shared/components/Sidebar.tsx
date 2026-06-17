@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, ScrollText, Sparkles, RefreshCw, User } from "lucide-react";
+import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home", exact: true },
@@ -10,7 +10,6 @@ const navItems = [
   { href: "/hadith", icon: ScrollText, label: "Hadith", exact: false },
   { href: "/dua", icon: Sparkles, label: "Dua", exact: false },
   { href: "/dhikr", icon: RefreshCw, label: "Dhikr", exact: false },
-  { href: "/profile", icon: User, label: "Profile", exact: false },
 ];
 
 export function Sidebar() {
