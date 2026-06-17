@@ -9,7 +9,7 @@ interface PageProps {
 const getPageNumbers = (current: number, total: number) => {
   const pages: (number | string)[] = [];
   const delta = 2; // How many pages before and after current page
-  
+
   for (let i = 1; i <= total; i++) {
     if (
       i === 1 ||
@@ -52,7 +52,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
               <Link
                 href={`/dua?category=${encodeURIComponent(cat)}`}
                 key={cat}
-                className="bg-white rounded-3xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
+                className="bg-white rounded-2xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
               >
                 <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
                   <FolderOpen size={24} />
@@ -81,8 +81,8 @@ export default async function DuaPage({ searchParams }: PageProps) {
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
       {/* Back to Categories Button */}
-      <Link 
-        href="/dua" 
+      <Link
+        href="/dua"
         className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit"
       >
         <ArrowLeft size={16} />
@@ -94,7 +94,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
           {category ? category : `Search Results for "${query}"`}
         </h1>
         <p className="text-slate-500">
-          {category 
+          {category
             ? `Explore authentic supplications in ${category}.`
             : `Found ${total} supplications matching your search.`}
         </p>
@@ -123,7 +123,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
           </Link>
         ))}
         {duas.length === 0 && (
-          <div className="p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">
+          <div className="p-10 text-center text-slate-500 bg-white rounded-2xl border border-[#E9E3D8]">
             No Duas found.
           </div>
         )}
@@ -161,11 +161,10 @@ export default async function DuaPage({ searchParams }: PageProps) {
               <Link
                 key={`page-${p}`}
                 href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${p}`}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all shadow-sm ${
-                  isCurrent
+                className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all shadow-sm ${isCurrent
                     ? 'bg-[#2D5A43] text-white border border-[#2D5A43]'
                     : 'bg-white text-slate-600 border border-[#E9E3D8] hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30'
-                }`}
+                  }`}
                 aria-current={isCurrent ? 'page' : undefined}
               >
                 {p}

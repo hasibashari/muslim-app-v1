@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, Info } from "lucide-react";
 import { useSession } from "@/src/features/auth/hooks";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db, isConfigured } from "@/src/lib/firebase";
@@ -27,6 +27,14 @@ interface DhikrDetailPageClientProps {
 export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClientProps) {
   const { data: session, status } = useSession();
   const [bookmarkedDhikrs, setBookmarkedDhikrs] = useState<Record<string, boolean>>({});
+  const [expandedBenefits, setExpandedBenefits] = useState<Record<number, boolean>>({});
+
+  const toggleBenefit = (id: number) => {
+    setExpandedBenefits((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.id && isConfigured) {
@@ -129,17 +137,22 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
       </div>
 
       <div className="flex flex-col gap-6 mt-2">
-        {dhikrs.map((dhikr) => {
+        {dhikrs.map((dhikr, index) => {
           const itemId = String(dhikr.id);
           const isBookmarked = !!bookmarkedDhikrs[itemId];
 
           return (
-            <div key={dhikr.id} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between relative">
+            <div key={dhikr.id} className="bg-white rounded-2xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between relative">
               <div className="flex flex-col gap-6">
-                <div className="flex justify-between items-start border-b border-[#E9E3D8]/50 pb-4 gap-4 pr-12">
-                  <h2 className="text-lg font-bold text-[#1A3A2A]">{dhikr.title}</h2>
+                <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4 gap-4 pr-12">
+                  <div
+                    className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
+                    style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
+                  >
+                    {index + 1}
+                  </div>
                   {dhikr.read && (
-                    <span className="shrink-0 text-[10px] font-bold px-2.5 py-1 bg-[#F5F1EA] text-[#2D5A43] border border-[#E9E3D8] rounded-full uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2.5 py-1 bg-[#F5F1EA] text-[#2D5A43] border border-[#E9E3D8] rounded-2xl uppercase tracking-wider text-right max-w-[70%] sm:max-w-[80%] break-words">
                       {dhikr.read}
                     </span>
                   )}
@@ -149,8 +162,8 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
                 <button
                   onClick={() => handleToggleBookmark(dhikr)}
                   className={`absolute top-6 right-6 p-2 rounded-xl transition-colors cursor-pointer border ${isBookmarked
-                      ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
-                      : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
+                    ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
+                    : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
                     }`}
                   title={isBookmarked ? "Hapus Bookmark Dzikir" : "Simpan Bookmark Dzikir"}
                 >
@@ -171,24 +184,44 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
                   </p>
                 </div>
 
-                {dhikr.benefit && (
-                  <div className="text-xs text-[#2D5A43] bg-[#F4F9F6] border border-emerald-100/50 rounded-2xl p-4 leading-relaxed mt-2">
-                    <span className="font-bold block mb-1 text-[#1A3A2A] uppercase tracking-wider text-[10px]">Fadhilah:</span>
-                    {dhikr.benefit}
-                  </div>
-                )}
+
               </div>
 
-              {dhikr.reference && (
-                <div className="pt-4 flex items-center justify-end border-t border-[#E9E3D8]/30">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dhikr.reference}</p>
+              {(dhikr.benefit || dhikr.reference) && (
+                <div className="pt-4 flex flex-col gap-4 border-t border-[#E9E3D8]/30">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      {dhikr.benefit && (
+                        <button
+                          onClick={() => toggleBenefit(dhikr.id)}
+                          className={`p-2 rounded-xl transition-colors cursor-pointer border shrink-0 ${expandedBenefits[dhikr.id]
+                            ? "text-white bg-[#2D5A43] border-[#2D5A43]"
+                            : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-[#E9E3D8]"
+                            }`}
+                          title={expandedBenefits[dhikr.id] ? "Sembunyikan Fadhilah" : "Lihat Fadhilah"}
+                        >
+                          <Info size={16} />
+                        </button>
+                      )}
+                    </div>
+                    {dhikr.reference && (
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">{dhikr.reference}</p>
+                    )}
+                  </div>
+
+                  {dhikr.benefit && expandedBenefits[dhikr.id] && (
+                    <div className="text-xs text-[#2D5A43] bg-[#F4F9F6] border border-emerald-100/50 rounded-2xl p-4 leading-relaxed mt-2 animate-fadeIn">
+                      <span className="font-bold block mb-1 text-[#1A3A2A] uppercase tracking-wider text-[10px]">Fadhilah:</span>
+                      {dhikr.benefit}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           );
         })}
         {dhikrs.length === 0 && (
-          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">No Dhikrs found in this category.</div>
+          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-2xl border border-[#E9E3D8]">No Dhikrs found in this category.</div>
         )}
       </div>
     </div>

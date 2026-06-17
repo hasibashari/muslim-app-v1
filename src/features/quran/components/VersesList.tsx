@@ -17,7 +17,7 @@ interface VersesListProps {
 export function VersesList({ verses, surahId, surahName }: VersesListProps) {
   const { settings } = useSettings();
   const { data: session, status } = useSession();
-  
+
   const [expandedFootnotes, setExpandedFootnotes] = useState<Record<number, boolean>>({});
   const [bookmarkedVerses, setBookmarkedVerses] = useState<Record<string, boolean>>(() => {
     if (typeof window !== "undefined") {
@@ -32,7 +32,7 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
             }
           });
           return bookmarked;
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     return {};
@@ -127,11 +127,10 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
               <button
                 key={index}
                 onClick={() => toggleFootnote(verse.id)}
-                className={`align-super text-[10px] font-bold px-0.5 select-none transition-colors cursor-pointer ${
-                  isActive 
-                    ? "text-[#D97706] hover:text-[#B45309]" 
-                    : "text-[#2D5A43] hover:text-[#1A3A2A] hover:underline"
-                }`}
+                className={`align-super text-[10px] font-bold px-0.5 select-none transition-colors cursor-pointer ${isActive
+                  ? "text-[#D97706] hover:text-[#B45309]"
+                  : "text-[#2D5A43] hover:text-[#1A3A2A] hover:underline"
+                  }`}
                 title="Click to view footnote"
               >
                 {num}
@@ -147,11 +146,11 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
   // Determine Arabic font size class based on settings
   const getArabicFontSizeClass = () => {
     switch (settings.fontSize) {
-      case "small": return "text-2xl md:text-3xl leading-relaxed";
-      case "large": return "text-4xl md:text-5xl leading-loose";
+      case "small": return "text-2xl md:text-3xl leading-[2.5] py-2";
+      case "large": return "text-4xl md:text-5xl leading-[3] py-4";
       case "medium":
       default:
-        return "text-3xl md:text-4xl leading-loose";
+        return "text-3xl md:text-4xl leading-[2.8] py-3";
     }
   };
 
@@ -163,11 +162,11 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
         const isBookmarked = !!bookmarkedVerses[itemId];
 
         return (
-          <div key={verse.id} id={`verse-${verse.verse_number}`} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm transition-all duration-300">
+          <div key={verse.id} id={`verse-${verse.verse_number}`} className="bg-white rounded-xl p-6 md:p-8 flex flex-col gap-6 relative shadow-sm hover:shadow-md hover:bg-[#FAF9F5]/50 transition-all duration-300">
             <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
 
             <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
-              <div 
+              <div
                 className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
                 style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
               >
@@ -177,11 +176,10 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
               {/* Bookmark Button */}
               <button
                 onClick={() => handleToggleBookmark(verse.verse_number)}
-                className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                  isBookmarked 
-                    ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100" 
-                    : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
-                }`}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${isBookmarked
+                  ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
+                  : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
+                  }`}
                 title={isBookmarked ? "Hapus Bookmark" : "Simpan Bookmark"}
               >
                 {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
@@ -211,8 +209,8 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
                     {verse.footnotes}
                   </p>
                 </div>
-                <button 
-                  onClick={() => toggleFootnote(verse.id)} 
+                <button
+                  onClick={() => toggleFootnote(verse.id)}
                   className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 p-1 hover:bg-[#F5F1EA] rounded-full transition-all cursor-pointer"
                   title="Close footnote"
                 >

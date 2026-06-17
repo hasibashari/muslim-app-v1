@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, Sparkles, RefreshCw } from "lucide-react";
+import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home", exact: true },
   { href: "/quran", icon: BookOpen, label: "Quran", exact: false },
+  { href: "/hadith", icon: ScrollText, label: "Hadith", exact: false },
   { href: "/dua", icon: Sparkles, label: "Dua", exact: false },
   { href: "/dhikr", icon: RefreshCw, label: "Dhikr", exact: false },
 ];

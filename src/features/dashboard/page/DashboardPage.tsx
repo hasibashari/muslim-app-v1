@@ -15,7 +15,7 @@ export default async function DashboardPage() {
   if (sessionCookie) {
     try {
       userName = JSON.parse(decodeURIComponent(sessionCookie))?.name;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   const allSurahs = quranService.getAllSurahs();

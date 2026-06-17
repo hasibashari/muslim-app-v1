@@ -31,7 +31,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
         try {
           const parsed = JSON.parse(localData) as any[];
           return parsed.some((b) => b.item_type === "dua" && b.item_id === itemId);
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     return false;
@@ -104,7 +104,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
     const sourceMatch = refText.match(sourceRegex);
     let mainText = refText;
     let sourceText = "";
-    
+
     if (sourceMatch) {
       sourceText = sourceMatch[1];
       mainText = refText.replace(sourceRegex, "").trim();
@@ -120,14 +120,14 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
         const textBeforeUrl = sourceText.split(urlRegex)[0];
         const cleanUrl = url.replace(/[).,]+$/, "");
         const trailingText = url.substring(cleanUrl.length);
-        
+
         formattedSource = (
           <span className="text-[10px] sm:text-xs text-slate-400 flex items-center gap-1 flex-wrap break-all w-full justify-end">
             <span>{textBeforeUrl}</span>
-            <a 
-              href={cleanUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href={cleanUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-[#2D5A43] hover:underline font-medium inline-flex items-center gap-0.5 break-all"
             >
               {cleanUrl}
@@ -188,15 +188,14 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
         Back to Supplications
       </Link>
 
-      <div className="bg-white rounded-3xl border border-[#E9E3D8] p-5 sm:p-8 md:p-10 flex flex-col gap-8 shadow-sm relative">
+      <div className="bg-white rounded-2xl border border-[#E9E3D8] p-5 sm:p-8 md:p-10 flex flex-col gap-8 shadow-sm relative">
         {/* Bookmark Button */}
         <button
           onClick={toggleBookmark}
-          className={`absolute top-5 right-5 sm:top-8 sm:right-8 p-2 rounded-xl transition-colors cursor-pointer border ${
-            isBookmarked 
-              ? "text-[#2D5A43] bg-emerald-50 border-emerald-100" 
+          className={`absolute top-5 right-5 sm:top-8 sm:right-8 p-2 rounded-xl transition-colors cursor-pointer border ${isBookmarked
+              ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
               : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
-          }`}
+            }`}
           title={isBookmarked ? "Hapus Bookmark Doa" : "Simpan Bookmark Doa"}
         >
           {isBookmarked ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}

@@ -25,7 +25,7 @@ export default async function DuaCategoryPage() {
             <Link
               href={`/dua?category=${encodeURIComponent(category)}`}
               key={category}
-              className="bg-white rounded-3xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
+              className="bg-white rounded-2xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer text-left"
             >
               <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
                 <FolderOpen size={24} />
@@ -43,7 +43,7 @@ export default async function DuaCategoryPage() {
           );
         })}
         {categories.length === 0 && (
-          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">
+          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-2xl border border-[#E9E3D8]">
             No categories found.
           </div>
         )}

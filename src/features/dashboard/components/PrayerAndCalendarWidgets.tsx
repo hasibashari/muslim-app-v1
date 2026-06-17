@@ -13,21 +13,43 @@ export function PrayerAndCalendarWidgets() {
   const [coords, setCoords] = useState({ latitude: -6.2088, longitude: 106.8456 });
   const [locationName, setLocationName] = useState("Jakarta");
 
-  // 1. Get browser geolocation and update coordinates
+  // 1. Load saved location or request if not present
   useEffect(() => {
-    if (typeof window !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-          setLocationName("Lokasi Anda");
-        },
-        (error) => {
-          console.log("Using default location (Jakarta) due to: ", error.message);
+    if (typeof window !== "undefined") {
+      const savedCoords = localStorage.getItem("noor_user_coords");
+      const savedLocationName = localStorage.getItem("noor_location_name");
+
+      if (savedCoords) {
+        try {
+          const parsed = JSON.parse(savedCoords);
+          if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+            setCoords(parsed);
+            setLocationName(savedLocationName || "Lokasi Anda");
+            return; // Use saved coordinates, do not trigger prompt!
+          }
+        } catch (e) {
+          console.error("Failed to parse saved coordinates:", e);
         }
-      );
+      }
+
+      // If no saved coordinates, request once
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const newCoords = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            };
+            setCoords(newCoords);
+            setLocationName("Lokasi Anda");
+            localStorage.setItem("noor_user_coords", JSON.stringify(newCoords));
+            localStorage.setItem("noor_location_name", "Lokasi Anda");
+          },
+          (error) => {
+            console.log("Using default location (Jakarta) due to: ", error.message);
+          }
+        );
+      }
     }
   }, []);
 

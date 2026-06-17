@@ -14,7 +14,7 @@ export default async function HadithDetailPage({
   const collectionId = resolvedParams.id;
   
   const page = parseInt(resolvedSearchParams.page || '1', 10) || 1;
-  const limit = 50;
+  const limit = 10;
 
   const collections = hadithService.getCollections();
   const collection = collections.find(c => c.id === collectionId);

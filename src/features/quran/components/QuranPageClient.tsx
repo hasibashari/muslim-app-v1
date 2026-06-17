@@ -51,7 +51,7 @@ export function QuranPageClient({ surahs }: QuranPageClientProps) {
         )}
       </div>
 
-      <div className="bg-white rounded-3xl border border-[#E9E3D8] p-2 space-y-0.5">
+      <div className="bg-white rounded-2xl border border-[#E9E3D8] p-2 space-y-0.5">
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-slate-400 font-semibold">Surah tidak ditemukan</p>

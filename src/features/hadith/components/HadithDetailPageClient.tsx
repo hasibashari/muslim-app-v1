@@ -33,7 +33,7 @@ interface HadithDetailPageClientProps {
 const getPageNumbers = (current: number, total: number) => {
   const pages: (number | string)[] = [];
   const delta = 2;
-  
+
   for (let i = 1; i <= total; i++) {
     if (
       i === 1 ||
@@ -71,7 +71,7 @@ export function HadithDetailPageClient({
             }
           });
           return bookmarked;
-        } catch (e) {}
+        } catch (e) { }
       }
     }
     return {};
@@ -167,7 +167,7 @@ export function HadithDetailPageClient({
           const isBookmarked = !!bookmarkedHadiths[itemId];
 
           return (
-            <div key={hadith.id} id={`hadith-${hadith.hadith_number}`} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm">
+            <div key={hadith.id} id={`hadith-${hadith.hadith_number}`} className="bg-white rounded-2xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm">
               <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
 
               <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
@@ -178,11 +178,10 @@ export function HadithDetailPageClient({
                 {/* Bookmark Button */}
                 <button
                   onClick={() => handleToggleBookmark(hadith)}
-                  className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                    isBookmarked 
-                      ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100" 
+                  className={`p-2 rounded-xl transition-colors cursor-pointer ${isBookmarked
+                      ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
                       : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
-                  }`}
+                    }`}
                   title={isBookmarked ? "Hapus Bookmark Hadits" : "Simpan Bookmark Hadits"}
                 >
                   {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
@@ -202,7 +201,7 @@ export function HadithDetailPageClient({
           );
         })}
         {hadiths.length === 0 && (
-          <div className="p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">No Hadiths found.</div>
+          <div className="p-10 text-center text-slate-500 bg-white rounded-2xl border border-[#E9E3D8]">No Hadiths found.</div>
         )}
       </div>
 
@@ -236,11 +235,10 @@ export function HadithDetailPageClient({
               <Link
                 key={`page-${p}`}
                 href={`/hadith/${collectionId}?page=${p}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors shadow-sm ${
-                  isCurrent
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors shadow-sm ${isCurrent
                     ? 'bg-[#2D5A43] text-white border border-[#2D5A43]'
                     : 'bg-white text-slate-600 border border-[#E9E3D8] hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30'
-                }`}
+                  }`}
                 aria-current={isCurrent ? 'page' : undefined}
               >
                 {p}

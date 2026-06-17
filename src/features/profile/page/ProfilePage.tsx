@@ -5,18 +5,18 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FaGoogle } from "react-icons/fa";
-import { 
-  User, 
-  Mail, 
-  LogOut, 
-  BookOpen, 
-  Sparkles, 
-  RefreshCw, 
-  ScrollText, 
-  Database, 
-  CheckCircle2, 
-  Trash2, 
-  Loader2, 
+import {
+  User,
+  Mail,
+  LogOut,
+  BookOpen,
+  Sparkles,
+  RefreshCw,
+  ScrollText,
+  Database,
+  CheckCircle2,
+  Trash2,
+  Loader2,
   AlertCircle,
   Settings
 } from "lucide-react";
@@ -93,7 +93,7 @@ export default function ProfilePage() {
   // 2. Sync Local Storage bookmarks to Firestore on login
   const handleSync = useCallback(async () => {
     if (status !== "authenticated" || !uid || !isConfigured) return;
-    
+
     const localData = localStorage.getItem("noor_bookmarks");
     if (!localData) return;
 
@@ -103,7 +103,7 @@ export default function ProfilePage() {
       if (parsed.length === 0) return;
 
       const batch = writeBatch(db);
-      
+
       parsed.forEach((bookmark) => {
         const docId = `${bookmark.item_type}_${bookmark.item_id}`;
         const docRef = doc(db, "users", uid, "bookmarks", docId);
@@ -175,13 +175,13 @@ export default function ProfilePage() {
 
   const getBookmarkLink = (bookmark: Bookmark) => {
     switch (bookmark.item_type) {
-      case "quran": 
+      case "quran":
         if (bookmark.item_id.includes(":")) {
           const [surahId, verseNum] = bookmark.item_id.split(":");
           return `/quran/${surahId}#verse-${verseNum}`;
         }
         return `/quran/${bookmark.item_id}`;
-      case "hadith": 
+      case "hadith":
         if (bookmark.item_id.includes(":")) {
           const [collectionId, pageNum, hadithNum] = bookmark.item_id.split(":");
           return `/hadith/${collectionId}?page=${pageNum}#hadith-${hadithNum}`;
@@ -194,8 +194,8 @@ export default function ProfilePage() {
   };
 
   const displayList = status === "authenticated" ? bookmarks : localBookmarks;
-  const filteredBookmarks = activeTab === "all" 
-    ? displayList 
+  const filteredBookmarks = activeTab === "all"
+    ? displayList
     : displayList.filter(b => b.item_type === activeTab);
 
   if (status === "loading") {
@@ -218,11 +218,10 @@ export default function ProfilePage() {
       </div>
 
       {message && (
-        <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 border ${
-          message.type === "success" 
-            ? "bg-emerald-50 border-emerald-200 text-emerald-800" 
+        <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 border ${message.type === "success"
+            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
             : "bg-rose-50 border-rose-200 text-rose-800"
-        }`}>
+          }`}>
           {message.type === "success" ? <CheckCircle2 size={20} className="text-emerald-600" /> : <AlertCircle size={20} className="text-rose-600" />}
           <p className="text-sm font-medium">{message.text}</p>
         </div>
@@ -231,16 +230,16 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Left Column: Profile, Settings & Sync Cards */}
         <div className="md:col-span-1 space-y-6">
-          <div className="bg-white border border-[#E9E3D8] rounded-3xl p-6 shadow-sm overflow-hidden relative">
+          <div className="bg-white border border-[#E9E3D8] rounded-2xl p-6 shadow-sm overflow-hidden relative">
             <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-[#2D5A43]/10 to-[#E9E3D8]/40 -z-0"></div>
-            
+
             <div className="relative z-10 flex flex-col items-center text-center mt-6">
               {/* Profile Pic */}
               <div className="w-24 h-24 rounded-full border-4 border-white bg-[#E9E3D8] overflow-hidden shadow-md shrink-0 flex items-center justify-center">
                 {session?.user?.image ? (
-                  <Image 
-                    src={session.user.image} 
-                    alt={session.user.name || "User"} 
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
                     className="w-full h-full object-cover"
                     width={96}
                     height={96}
@@ -259,8 +258,8 @@ export default function ProfilePage() {
                     <Mail size={12} />
                     {session.user.email}
                   </p>
-                  
-                  <button 
+
+                  <button
                     onClick={() => signOut()}
                     className="mt-6 w-full flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors border border-rose-200 cursor-pointer"
                   >
@@ -272,8 +271,8 @@ export default function ProfilePage() {
                 <>
                   <h3 className="text-lg font-bold text-[#1A3A2A] mt-4">Guest Mode</h3>
                   <p className="text-xs text-slate-400 mt-1">Connect your account to save bookmarks permanently.</p>
-                  
-                  <button 
+
+                  <button
                     onClick={() => signIn("google")}
                     className="mt-6 w-full flex items-center justify-center gap-2.5 bg-[#2D5A43] hover:bg-[#1A3A2A] text-white py-2.5 px-4 rounded-xl text-sm font-semibold shadow-md shadow-[#2D5A43]/10 hover:shadow-lg transition-all cursor-pointer"
                   >
@@ -286,12 +285,12 @@ export default function ProfilePage() {
           </div>
 
           {/* App Settings Card */}
-          <div className="bg-white border border-[#E9E3D8] rounded-3xl p-5 space-y-4 shadow-sm">
+          <div className="bg-white border border-[#E9E3D8] rounded-2xl p-5 space-y-4 shadow-sm">
             <div className="flex items-center gap-2 border-b border-[#E9E3D8]/50 pb-2 text-[#1A3A2A]">
               <Settings size={18} />
               <h4 className="text-sm font-bold">App Preferences</h4>
             </div>
-            
+
             {/* Font Size Setting */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-slate-500 block">Arabic Font Size</label>
@@ -300,11 +299,10 @@ export default function ProfilePage() {
                   <button
                     key={size}
                     onClick={() => updateSetting("fontSize", size)}
-                    className={`py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
-                      settings.fontSize === size 
-                        ? "bg-[#2D5A43] text-white shadow-sm" 
+                    className={`py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${settings.fontSize === size
+                        ? "bg-[#2D5A43] text-white shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
-                    }`}
+                      }`}
                   >
                     {size === "small" ? "Kecil" : size === "medium" ? "Sedang" : "Besar"}
                   </button>
@@ -320,19 +318,17 @@ export default function ProfilePage() {
               </div>
               <button
                 onClick={() => updateSetting("showTranslation", !settings.showTranslation)}
-                className={`w-11 h-6 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
-                  settings.showTranslation ? "bg-[#2D5A43]" : "bg-slate-200"
-                }`}
+                className={`w-11 h-6 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${settings.showTranslation ? "bg-[#2D5A43]" : "bg-slate-200"
+                  }`}
               >
-                <span className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all shadow-sm ${
-                  settings.showTranslation ? "left-6" : "left-1"
-                }`} />
+                <span className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all shadow-sm ${settings.showTranslation ? "left-6" : "left-1"
+                  }`} />
               </button>
             </div>
           </div>
 
           {/* Sync Card */}
-          <div className="bg-[#F5F1EA] border border-[#E9E3D8] rounded-3xl p-5">
+          <div className="bg-[#F5F1EA] border border-[#E9E3D8] rounded-2xl p-5">
             <div className="flex items-start gap-3">
               <Database className="text-[#2D5A43] shrink-0 mt-0.5" size={20} />
               <div>
@@ -345,7 +341,7 @@ export default function ProfilePage() {
                   )}
                 </p>
                 {status === "unauthenticated" && localBookmarks.length > 0 && (
-                  <button 
+                  <button
                     onClick={() => signIn("google")}
                     className="mt-3 text-xs font-bold text-[#2D5A43] hover:underline flex items-center gap-1 cursor-pointer"
                   >
@@ -353,7 +349,7 @@ export default function ProfilePage() {
                   </button>
                 )}
                 {status === "authenticated" && localBookmarks.length > 0 && (
-                  <button 
+                  <button
                     onClick={handleSync}
                     disabled={isSyncing}
                     className="mt-3 w-full bg-[#2D5A43] text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:bg-[#1A3A2A] cursor-pointer"
@@ -369,7 +365,7 @@ export default function ProfilePage() {
 
         {/* Right Column: Bookmarks List */}
         <div className="md:col-span-2 space-y-6">
-          <div className="bg-white border border-[#E9E3D8] rounded-3xl p-6 shadow-sm min-h-[400px] flex flex-col">
+          <div className="bg-white border border-[#E9E3D8] rounded-2xl p-6 shadow-sm min-h-[400px] flex flex-col">
             <div className="flex items-center justify-between border-b border-[#E9E3D8] pb-4 mb-6">
               <h3 className="font-bold text-[#1A3A2A] text-lg">My Favorites</h3>
               <span className="text-xs font-semibold px-2.5 py-1 bg-[#F5F1EA] rounded-full text-slate-600">
@@ -383,11 +379,10 @@ export default function ProfilePage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider shrink-0 cursor-pointer ${
-                    activeTab === tab 
-                      ? "bg-[#2D5A43] text-white" 
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider shrink-0 cursor-pointer ${activeTab === tab
+                      ? "bg-[#2D5A43] text-white"
                       : "bg-[#F5F1EA]/60 hover:bg-[#F5F1EA] text-slate-500"
-                  }`}
+                    }`}
                 >
                   {getTabIcon(tab)}
                   {tab}
@@ -407,19 +402,19 @@ export default function ProfilePage() {
                 </div>
                 <h4 className="font-bold text-[#1A3A2A]">No Favorites Found</h4>
                 <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                  {activeTab === "all" 
-                    ? "Start bookmarking your favorite Quran verses, Duas, Hadiths, or Dhikr to see them here!" 
+                  {activeTab === "all"
+                    ? "Start bookmarking your favorite Quran verses, Duas, Hadiths, or Dhikr to see them here!"
                     : `You haven't bookmarked any items in ${activeTab} yet.`}
                 </p>
               </div>
             ) : (
               <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
                 {filteredBookmarks.map((bookmark) => (
-                  <div 
+                  <div
                     key={`${bookmark.item_type}-${bookmark.item_id}`}
                     className="flex items-center justify-between p-4 bg-white border border-[#E9E3D8] hover:border-[#2D5A43]/40 rounded-2xl transition-all shadow-sm group"
                   >
-                    <Link 
+                    <Link
                       href={getBookmarkLink(bookmark)}
                       className="flex items-center gap-3.5 flex-1 min-w-0"
                     >

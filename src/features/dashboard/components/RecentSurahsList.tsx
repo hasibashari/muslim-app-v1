@@ -45,7 +45,7 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
   }, [allSurahs]);
 
   return (
-    <div className="bg-white rounded-3xl border border-[#E9E3D8] p-2">
+    <div className="bg-white rounded-2xl border border-[#E9E3D8] p-2">
       {recentSurahs.map((s) => (
         <Link
           href={`/quran/${s.id}`}

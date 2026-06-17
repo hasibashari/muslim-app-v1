@@ -15,7 +15,7 @@ export default function DhikrPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {categories.map((category) => (
-          <Link href={`/dhikr/${encodeURIComponent(category.toLowerCase())}`} key={category} className="bg-white rounded-3xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer">
+          <Link href={`/dhikr/${encodeURIComponent(category.toLowerCase())}`} key={category} className="bg-white rounded-2xl border border-[#E9E3D8] p-8 flex flex-col gap-4 hover:shadow-md transition-shadow group relative overflow-hidden cursor-pointer">
             <div className="w-12 h-12 rounded-xl bg-[#F0F4F2] flex items-center justify-center text-[#2D5A43] group-hover:scale-110 transition-transform">
               <FolderOpen size={24} />
             </div>
@@ -31,7 +31,7 @@ export default function DhikrPage() {
           </Link>
         ))}
         {categories.length === 0 && (
-          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">No Categories found.</div>
+          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-2xl border border-[#E9E3D8]">No Categories found.</div>
         )}
       </div>
     </div>
