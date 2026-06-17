@@ -1,8 +1,9 @@
 "use client";
 
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useSession, signIn, signOut } from "@/src/features/auth/hooks";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
 import { 
   User, 
   Mail, 
@@ -15,20 +16,26 @@ import {
   CheckCircle2, 
   Trash2, 
   Loader2, 
-  AlertCircle 
+  AlertCircle,
+  Settings
 } from "lucide-react";
+import { collection, getDocs, deleteDoc, doc, writeBatch, query, orderBy } from "firebase/firestore";
+import { db, isConfigured } from "@/src/lib/firebase";
+import { useSettings } from "@/src/features/settings/hooks";
 
 interface Bookmark {
-  id?: number;
+  id?: string;
   item_type: "quran" | "hadith" | "dua" | "dhikr";
   item_id: string;
   title: string;
   subtitle: string;
+  category?: string;
   created_at?: string;
 }
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
+  const { settings, updateSetting } = useSettings();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [localBookmarks, setLocalBookmarks] = useState<Bookmark[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,18 +43,24 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"all" | "quran" | "hadith" | "dua" | "dhikr">("all");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // 1. Fetch bookmarks from DB if logged in, otherwise from LocalStorage
-  const fetchBookmarks = async () => {
-    if (status === "authenticated") {
+  // 1. Fetch bookmarks from Firestore if logged in, otherwise from LocalStorage
+  const fetchBookmarks = useCallback(async () => {
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
       try {
         setIsLoading(true);
-        const res = await fetch("/api/user/bookmarks");
-        if (res.ok) {
-          const data = await res.json();
-          setBookmarks(data.bookmarks || []);
-        }
+        const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
+        const q = query(bookmarksRef, orderBy("created_at", "desc"));
+        const querySnapshot = await getDocs(q);
+        const fetchedBookmarks: Bookmark[] = [];
+        querySnapshot.forEach((docSnap) => {
+          fetchedBookmarks.push({
+            id: docSnap.id,
+            ...docSnap.data() as Bookmark,
+          });
+        });
+        setBookmarks(fetchedBookmarks);
       } catch (err) {
-        console.error("Failed to fetch bookmarks:", err);
+        console.error("Failed to fetch bookmarks from Firestore:", err);
       } finally {
         setIsLoading(false);
       }
@@ -64,42 +77,53 @@ export default function ProfilePage() {
       }
       setIsLoading(false);
     }
-  };
+  }, [status, session]);
 
   useEffect(() => {
     if (status !== "loading") {
-      fetchBookmarks();
+      const timer = setTimeout(() => {
+        fetchBookmarks();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [status]);
+  }, [status, session, fetchBookmarks]);
 
-  // 2. Sync Local Storage bookmarks to Database on login
-  const handleSync = async () => {
-    if (status !== "authenticated") return;
+  // 2. Sync Local Storage bookmarks to Firestore on login
+  const handleSync = useCallback(async () => {
+    const uid = session?.user?.id;
+    if (status !== "authenticated" || !uid || !isConfigured) return;
     
     const localData = localStorage.getItem("noor_bookmarks");
     if (!localData) return;
 
     try {
+      setIsSyncing(true);
       const parsed = JSON.parse(localData) as Bookmark[];
       if (parsed.length === 0) return;
 
-      setIsSyncing(true);
-      const res = await fetch("/api/user/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookmarks: parsed }),
+      const batch = writeBatch(db);
+      
+      parsed.forEach((bookmark) => {
+        const docId = `${bookmark.item_type}_${bookmark.item_id}`;
+        const docRef = doc(db, "users", uid, "bookmarks", docId);
+        batch.set(docRef, {
+          item_type: bookmark.item_type,
+          item_id: bookmark.item_id,
+          title: bookmark.title,
+          subtitle: bookmark.subtitle,
+          category: bookmark.category || "",
+          created_at: bookmark.created_at || new Date().toISOString()
+        }, { merge: true });
       });
 
-      if (res.ok) {
-        // Clear local storage after successful sync
-        localStorage.removeItem("noor_bookmarks");
-        setLocalBookmarks([]);
-        // Re-fetch database bookmarks
-        await fetchBookmarks();
-        setMessage({ type: "success", text: "Successfully synced all local bookmarks to your account!" });
-      } else {
-        setMessage({ type: "error", text: "Failed to sync bookmarks. Please try again." });
-      }
+      await batch.commit();
+
+      // Clear local storage after successful sync
+      localStorage.removeItem("noor_bookmarks");
+      setLocalBookmarks([]);
+      // Re-fetch database bookmarks
+      await fetchBookmarks();
+      setMessage({ type: "success", text: "Successfully synced all local bookmarks to your account!" });
     } catch (err) {
       console.error("Sync error:", err);
       setMessage({ type: "error", text: "An error occurred during synchronization." });
@@ -107,27 +131,28 @@ export default function ProfilePage() {
       setIsSyncing(false);
       setTimeout(() => setMessage(null), 5000);
     }
-  };
+  }, [status, session, fetchBookmarks]);
 
   // Auto-sync on load if logged in and local bookmarks exist
   useEffect(() => {
     if (status === "authenticated" && localBookmarks.length > 0) {
-      handleSync();
+      const timer = setTimeout(() => {
+        handleSync();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [status, localBookmarks]);
+  }, [status, localBookmarks.length, handleSync]);
 
   // 3. Delete bookmark
   const handleDeleteBookmark = async (item_type: string, item_id: string) => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
       try {
-        const res = await fetch(`/api/user/bookmarks?item_type=${item_type}&item_id=${item_id}`, {
-          method: "DELETE",
-        });
-        if (res.ok) {
-          setBookmarks(prev => prev.filter(b => !(b.item_type === item_type && b.item_id === item_id)));
-        }
+        const docId = `${item_type}_${item_id}`;
+        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
+        await deleteDoc(docRef);
+        setBookmarks(prev => prev.filter(b => !(b.item_type === item_type && b.item_id === item_id)));
       } catch (err) {
-        console.error("Failed to delete bookmark:", err);
+        console.error("Failed to delete bookmark from Firestore:", err);
       }
     } else {
       // Remove from local storage
@@ -149,10 +174,20 @@ export default function ProfilePage() {
 
   const getBookmarkLink = (bookmark: Bookmark) => {
     switch (bookmark.item_type) {
-      case "quran": return `/quran/${bookmark.item_id}`;
-      case "hadith": return `/hadith/${bookmark.item_id}`;
+      case "quran": 
+        if (bookmark.item_id.includes(":")) {
+          const [surahId, verseNum] = bookmark.item_id.split(":");
+          return `/quran/${surahId}#verse-${verseNum}`;
+        }
+        return `/quran/${bookmark.item_id}`;
+      case "hadith": 
+        if (bookmark.item_id.includes(":")) {
+          const [collectionId, pageNum, hadithNum] = bookmark.item_id.split(":");
+          return `/hadith/${collectionId}?page=${pageNum}#hadith-${hadithNum}`;
+        }
+        return `/hadith/${bookmark.item_id}`;
       case "dua": return `/dua/detail/${bookmark.item_id}`;
-      case "dhikr": return `/dhikr/${(bookmark as any).category?.toLowerCase() || ""}`;
+      case "dhikr": return `/dhikr/${bookmark.category?.toLowerCase() || ""}`;
       default: return "#";
     }
   };
@@ -178,7 +213,7 @@ export default function ProfilePage() {
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-[#1A3A2A]">Profile & Settings</h1>
-        <p className="text-sm text-slate-500 mt-1">Manage your account connection and synchronized bookmarks.</p>
+        <p className="text-sm text-slate-500 mt-1">Manage your account connection, preferences, and synchronized bookmarks.</p>
       </div>
 
       {message && (
@@ -193,7 +228,7 @@ export default function ProfilePage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column: Profile Card */}
+        {/* Left Column: Profile, Settings & Sync Cards */}
         <div className="md:col-span-1 space-y-6">
           <div className="bg-white border border-[#E9E3D8] rounded-3xl p-6 shadow-sm overflow-hidden relative">
             <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-r from-[#2D5A43]/10 to-[#E9E3D8]/40 -z-0"></div>
@@ -223,7 +258,7 @@ export default function ProfilePage() {
                   
                   <button 
                     onClick={() => signOut()}
-                    className="mt-6 w-full flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors border border-rose-200"
+                    className="mt-6 w-full flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 px-4 rounded-xl text-sm font-semibold transition-colors border border-rose-200 cursor-pointer"
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -236,15 +271,59 @@ export default function ProfilePage() {
                   
                   <button 
                     onClick={() => signIn("google")}
-                    className="mt-6 w-full flex items-center justify-center gap-2.5 bg-[#2D5A43] hover:bg-[#1A3A2A] text-white py-2.5 px-4 rounded-xl text-sm font-semibold shadow-md shadow-[#2D5A43]/10 hover:shadow-lg transition-all"
+                    className="mt-6 w-full flex items-center justify-center gap-2.5 bg-[#2D5A43] hover:bg-[#1A3A2A] text-white py-2.5 px-4 rounded-xl text-sm font-semibold shadow-md shadow-[#2D5A43]/10 hover:shadow-lg transition-all cursor-pointer"
                   >
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                      <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.355 0-6.075-2.72-6.075-6.075s2.72-6.075 6.075-6.075c1.496 0 2.867.545 3.928 1.446l3.179-3.179C18.995 1.946 15.82 1 12.24 1 5.92 1 1 5.92 1 12.24s4.92 11.24 11.24 11.24c5.986 0 11.24-4.323 11.24-11.24 0-.767-.091-1.503-.255-2.182H12.24z"/>
-                    </svg>
+                    <FaGoogle size={16} />
                     Connect Google
                   </button>
                 </>
               )}
+            </div>
+          </div>
+
+          {/* App Settings Card */}
+          <div className="bg-white border border-[#E9E3D8] rounded-3xl p-5 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 border-b border-[#E9E3D8]/50 pb-2 text-[#1A3A2A]">
+              <Settings size={18} />
+              <h4 className="text-sm font-bold">App Preferences</h4>
+            </div>
+            
+            {/* Font Size Setting */}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 block">Arabic Font Size</label>
+              <div className="grid grid-cols-3 gap-1.5 bg-[#F5F1EA]/60 p-1 rounded-xl">
+                {(["small", "medium", "large"] as const).map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => updateSetting("fontSize", size)}
+                    className={`py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
+                      settings.fontSize === size 
+                        ? "bg-[#2D5A43] text-white shadow-sm" 
+                        : "text-slate-500 hover:text-slate-900"
+                    }`}
+                  >
+                    {size === "small" ? "Kecil" : size === "medium" ? "Sedang" : "Besar"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Show Translation Setting */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#E9E3D8]/35">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block">Show Translations</label>
+                <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Show translated text for verses and details</span>
+              </div>
+              <button
+                onClick={() => updateSetting("showTranslation", !settings.showTranslation)}
+                className={`w-11 h-6 rounded-full transition-colors relative outline-none shrink-0 cursor-pointer ${
+                  settings.showTranslation ? "bg-[#2D5A43]" : "bg-slate-200"
+                }`}
+              >
+                <span className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-all shadow-sm ${
+                  settings.showTranslation ? "left-6" : "left-1"
+                }`} />
+              </button>
             </div>
           </div>
 
@@ -256,7 +335,7 @@ export default function ProfilePage() {
                 <h4 className="text-sm font-bold text-[#1A3A2A]">Data Synchronization</h4>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   {status === "authenticated" ? (
-                    "Your bookmarks are securely backed up in the cloud database. You can access them on any device."
+                    "Your bookmarks and settings are securely backed up in the cloud database. You can access them on any device."
                   ) : (
                     "You are in offline mode. Bookmarks are stored in this browser only and will be lost if you clear your browser history."
                   )}
@@ -264,7 +343,7 @@ export default function ProfilePage() {
                 {status === "unauthenticated" && localBookmarks.length > 0 && (
                   <button 
                     onClick={() => signIn("google")}
-                    className="mt-3 text-xs font-bold text-[#2D5A43] hover:underline flex items-center gap-1"
+                    className="mt-3 text-xs font-bold text-[#2D5A43] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     Login to sync {localBookmarks.length} bookmark(s) &rarr;
                   </button>
@@ -273,7 +352,7 @@ export default function ProfilePage() {
                   <button 
                     onClick={handleSync}
                     disabled={isSyncing}
-                    className="mt-3 w-full bg-[#2D5A43] text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:bg-[#1A3A2A]"
+                    className="mt-3 w-full bg-[#2D5A43] text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 hover:bg-[#1A3A2A] cursor-pointer"
                   >
                     {isSyncing ? <Loader2 size={12} className="animate-spin" /> : null}
                     Sync Local Data ({localBookmarks.length})
@@ -300,7 +379,7 @@ export default function ProfilePage() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider shrink-0 ${
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all uppercase tracking-wider shrink-0 cursor-pointer ${
                     activeTab === tab 
                       ? "bg-[#2D5A43] text-white" 
                       : "bg-[#F5F1EA]/60 hover:bg-[#F5F1EA] text-slate-500"
@@ -355,7 +434,7 @@ export default function ProfilePage() {
 
                     <button
                       onClick={() => handleDeleteBookmark(bookmark.item_type, bookmark.item_id)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all ml-4 shrink-0"
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all ml-4 shrink-0 cursor-pointer"
                       title="Remove Bookmark"
                     >
                       <Trash2 size={16} />

@@ -1,15 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Verse } from "../types";
-import { Info, X } from "lucide-react";
+import { Info, X, Bookmark, BookmarkCheck } from "lucide-react";
+import { useSettings } from "@/src/features/settings/hooks";
+import { useSession } from "@/src/features/auth/hooks";
+import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
+import { db, isConfigured } from "@/src/lib/firebase";
 
 interface VersesListProps {
   verses: Verse[];
+  surahId: number;
+  surahName: string;
 }
 
-export function VersesList({ verses }: VersesListProps) {
+export function VersesList({ verses, surahId, surahName }: VersesListProps) {
+  const { settings } = useSettings();
+  const { data: session, status } = useSession();
+  
   const [expandedFootnotes, setExpandedFootnotes] = useState<Record<number, boolean>>({});
+  const [bookmarkedVerses, setBookmarkedVerses] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== "undefined") {
+      const localData = localStorage.getItem("noor_bookmarks");
+      if (localData) {
+        try {
+          const parsed = JSON.parse(localData) as any[];
+          const bookmarked: Record<string, boolean> = {};
+          parsed.forEach((b) => {
+            if (b.item_type === "quran" && b.item_id.startsWith(`${surahId}:`)) {
+              bookmarked[b.item_id] = true;
+            }
+          });
+          return bookmarked;
+        } catch (e) {}
+      }
+    }
+    return {};
+  });
+
+  // 1. Fetch bookmarked verses for this Surah in Firestore
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
+      const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
+      getDocs(bookmarksRef).then((snap) => {
+        const bookmarked: Record<string, boolean> = {};
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.item_type === "quran" && data.item_id.startsWith(`${surahId}:`)) {
+            bookmarked[data.item_id] = true;
+          }
+        });
+        setBookmarkedVerses(bookmarked);
+      }).catch((err) => console.error("Error fetching verse bookmarks:", err));
+    }
+  }, [status, session?.user?.id, surahId]);
+
+  // 2. Toggle bookmark for a verse
+  const handleToggleBookmark = async (verseNumber: number) => {
+    const itemId = `${surahId}:${verseNumber}`;
+    const isCurrentlyBookmarked = !!bookmarkedVerses[itemId];
+
+    // Optimistic Update
+    setBookmarkedVerses((prev) => ({
+      ...prev,
+      [itemId]: !isCurrentlyBookmarked,
+    }));
+
+    const bookmarkData = {
+      item_type: "quran" as const,
+      item_id: itemId,
+      title: `${surahName} • Ayat ${verseNumber}`,
+      subtitle: `Surah ${surahName} • Ayat ${verseNumber}`,
+      created_at: new Date().toISOString(),
+    };
+
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
+      try {
+        const docId = `quran_${itemId}`;
+        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
+        if (isCurrentlyBookmarked) {
+          await deleteDoc(docRef);
+        } else {
+          await setDoc(docRef, bookmarkData);
+        }
+      } catch (err) {
+        console.error("Failed to update verse bookmark in Firestore:", err);
+      }
+    } else {
+      try {
+        const localData = localStorage.getItem("noor_bookmarks");
+        let bookmarks = localData ? JSON.parse(localData) : [];
+        if (isCurrentlyBookmarked) {
+          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "quran" && b.item_id === itemId));
+        } else {
+          bookmarks.push(bookmarkData);
+        }
+        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
+      } catch (e) {
+        console.error("Failed to update local bookmarks:", e);
+      }
+    }
+  };
 
   const toggleFootnote = (verseId: number) => {
     setExpandedFootnotes((prev) => ({
@@ -24,7 +115,6 @@ export function VersesList({ verses }: VersesListProps) {
       return <span>{translation}</span>;
     }
 
-    // Split text by superscript footnote pattern like 1), 2), etc.
     const parts = translation.split(/(\d+\))/g);
     return (
       <>
@@ -54,13 +144,26 @@ export function VersesList({ verses }: VersesListProps) {
     );
   };
 
+  // Determine Arabic font size class based on settings
+  const getArabicFontSizeClass = () => {
+    switch (settings.fontSize) {
+      case "small": return "text-2xl md:text-3xl leading-relaxed";
+      case "large": return "text-4xl md:text-5xl leading-loose";
+      case "medium":
+      default:
+        return "text-3xl md:text-4xl leading-loose";
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8 mt-6">
       {verses.map((verse) => {
         const isFootnoteOpen = expandedFootnotes[verse.id] && !!verse.footnotes;
+        const itemId = `${surahId}:${verse.verse_number}`;
+        const isBookmarked = !!bookmarkedVerses[itemId];
 
         return (
-          <div key={verse.id} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm transition-all duration-300">
+          <div key={verse.id} id={`verse-${verse.verse_number}`} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 md:p-8 flex flex-col gap-6 relative shadow-sm transition-all duration-300">
             <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
 
             <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
@@ -70,19 +173,34 @@ export function VersesList({ verses }: VersesListProps) {
               >
                 {verse.verse_number}
               </div>
+
+              {/* Bookmark Button */}
+              <button
+                onClick={() => handleToggleBookmark(verse.verse_number)}
+                className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                  isBookmarked 
+                    ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100" 
+                    : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
+                }`}
+                title={isBookmarked ? "Hapus Bookmark" : "Simpan Bookmark"}
+              >
+                {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+              </button>
             </div>
 
             <div className="flex flex-col gap-8">
-              <p className="text-3xl md:text-4xl font-serif text-right leading-loose text-[#1A3A2A]" dir="rtl">
+              <p className={`${getArabicFontSizeClass()} font-serif text-right text-[#1A3A2A]`} dir="rtl">
                 {verse.text_arabic}
               </p>
-              <p className="text-base md:text-lg text-slate-600 leading-relaxed">
-                {renderTranslationWithFootnotes(verse)}
-              </p>
+              {settings.showTranslation && (
+                <p className="text-base md:text-lg text-slate-600 leading-relaxed">
+                  {renderTranslationWithFootnotes(verse)}
+                </p>
+              )}
             </div>
 
             {/* Footnote callout box */}
-            {isFootnoteOpen && (
+            {isFootnoteOpen && settings.showTranslation && (
               <div className="mt-2 p-5 bg-[#FDFCF9] border border-[#E9E3D8] rounded-2xl text-sm text-slate-600 animate-fadeIn relative flex gap-3 items-start pr-10">
                 <Info size={18} className="text-[#2D5A43] shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">

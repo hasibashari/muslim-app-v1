@@ -45,13 +45,16 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // Focus input when modal opens
+  // Focus input and reset search when modal opens
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-      setQuery("");
-      setResults([]);
-      setHasSearched(false);
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+        setQuery("");
+        setResults([]);
+        setHasSearched(false);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [open]);
 

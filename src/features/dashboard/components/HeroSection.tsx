@@ -14,7 +14,11 @@ export function HeroSection({ userName }: HeroSectionProps) {
     const raw = localStorage.getItem("noor_last_read_quran");
     if (raw) {
       try {
-        setLastRead(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        const timer = setTimeout(() => {
+          setLastRead(parsed);
+        }, 0);
+        return () => clearTimeout(timer);
       } catch (e) {}
     }
   }, []);

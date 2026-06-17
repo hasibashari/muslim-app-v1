@@ -20,6 +20,7 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
       } catch (e) {}
     }
 
+    let result: Surah[] = [];
     if (recentIds.length > 0) {
       // Find matching surahs and order them according to recentIds list
       const matches = recentIds
@@ -31,11 +32,16 @@ export function RecentSurahsList({ allSurahs }: RecentSurahsListProps) {
         const remaining = allSurahs.filter((s) => !recentIds.includes(s.id));
         matches.push(...remaining.slice(0, 3 - matches.length));
       }
-      setRecentSurahs(matches.slice(0, 3));
+      result = matches.slice(0, 3);
     } else {
       // Fallback to first 3 surahs
-      setRecentSurahs(allSurahs.slice(0, 3));
+      result = allSurahs.slice(0, 3);
     }
+
+    const timer = setTimeout(() => {
+      setRecentSurahs(result);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [allSurahs]);
 
   return (

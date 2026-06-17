@@ -1,0 +1,190 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
+import { useSession } from "@/src/features/auth/hooks";
+import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
+import { db, isConfigured } from "@/src/lib/firebase";
+
+interface Dhikr {
+  id: number;
+  category: string;
+  title: string;
+  text_arabic: string;
+  text_translation: string;
+  reference: string | null;
+  latin: string | null;
+  read: string | null;
+  benefit: string | null;
+}
+
+interface DhikrDetailPageClientProps {
+  dhikrs: Dhikr[];
+  category: string;
+}
+
+export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClientProps) {
+  const { data: session, status } = useSession();
+  const [bookmarkedDhikrs, setBookmarkedDhikrs] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
+      const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
+      getDocs(bookmarksRef).then((snap) => {
+        const bookmarked: Record<string, boolean> = {};
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.item_type === "dhikr" && data.category === category) {
+            bookmarked[data.item_id] = true;
+          }
+        });
+        setBookmarkedDhikrs(bookmarked);
+      }).catch((err) => console.error("Error fetching dhikr bookmarks:", err));
+    } else if (status !== "loading") {
+      const localData = localStorage.getItem("noor_bookmarks");
+      let bookmarked: Record<string, boolean> = {};
+      if (localData) {
+        try {
+          const parsed = JSON.parse(localData) as any[];
+          parsed.forEach((b) => {
+            if (b.item_type === "dhikr" && b.category === category) {
+              bookmarked[b.item_id] = true;
+            }
+          });
+        } catch (e) {}
+      }
+      const timer = setTimeout(() => {
+        setBookmarkedDhikrs(bookmarked);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [status, session?.user?.id, category]);
+
+  // 2. Toggle Dhikr bookmark
+  const handleToggleBookmark = async (dhikr: Dhikr) => {
+    const itemId = String(dhikr.id);
+    const isCurrentlyBookmarked = !!bookmarkedDhikrs[itemId];
+
+    // Optimistic Update
+    setBookmarkedDhikrs((prev) => ({
+      ...prev,
+      [itemId]: !isCurrentlyBookmarked,
+    }));
+
+    const bookmarkData = {
+      item_type: "dhikr" as const,
+      item_id: itemId,
+      title: dhikr.title,
+      subtitle: `Dhikr • ${category}`,
+      category: category,
+      created_at: new Date().toISOString(),
+    };
+
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
+      try {
+        const docId = `dhikr_${itemId}`;
+        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
+        if (isCurrentlyBookmarked) {
+          await deleteDoc(docRef);
+        } else {
+          await setDoc(docRef, bookmarkData);
+        }
+      } catch (err) {
+        console.error("Failed to toggle dhikr bookmark in Firestore:", err);
+      }
+    } else {
+      try {
+        const localData = localStorage.getItem("noor_bookmarks");
+        let bookmarks = localData ? JSON.parse(localData) : [];
+        if (isCurrentlyBookmarked) {
+          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "dhikr" && b.item_id === itemId));
+        } else {
+          bookmarks.push(bookmarkData);
+        }
+        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
+      } catch (e) {
+        console.error("Failed to toggle local dhikr bookmark:", e);
+      }
+    }
+  };
+
+  return (
+    <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
+      <Link href="/dhikr" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit">
+        <ArrowLeft size={16} />
+        Back to Categories
+      </Link>
+
+      <div className="flex flex-col gap-2 mb-4">
+        <h1 className="text-4xl font-bold text-[#1A3A2A] font-serif">{category}</h1>
+        <p className="text-slate-500 font-semibold uppercase tracking-widest text-sm">{dhikrs.length} Remembrances</p>
+      </div>
+
+      <div className="flex flex-col gap-6 mt-2">
+        {dhikrs.map((dhikr) => {
+          const itemId = String(dhikr.id);
+          const isBookmarked = !!bookmarkedDhikrs[itemId];
+
+          return (
+            <div key={dhikr.id} className="bg-white rounded-3xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between relative">
+              <div className="flex flex-col gap-6">
+                <div className="flex justify-between items-start border-b border-[#E9E3D8]/50 pb-4 gap-4 pr-12">
+                  <h2 className="text-lg font-bold text-[#1A3A2A]">{dhikr.title}</h2>
+                  {dhikr.read && (
+                    <span className="shrink-0 text-[10px] font-bold px-2.5 py-1 bg-[#F5F1EA] text-[#2D5A43] border border-[#E9E3D8] rounded-full uppercase tracking-wider">
+                      {dhikr.read}
+                    </span>
+                  )}
+                </div>
+
+                {/* Bookmark Button */}
+                <button
+                  onClick={() => handleToggleBookmark(dhikr)}
+                  className={`absolute top-6 right-6 p-2 rounded-xl transition-colors cursor-pointer border ${
+                    isBookmarked 
+                      ? "text-[#2D5A43] bg-emerald-50 border-emerald-100" 
+                      : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
+                  }`}
+                  title={isBookmarked ? "Hapus Bookmark Dzikir" : "Simpan Bookmark Dzikir"}
+                >
+                  {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                </button>
+
+                <div className="flex flex-col gap-6">
+                  <p className="text-3xl font-serif text-right leading-loose text-[#2D5A43]" dir="rtl">
+                    {dhikr.text_arabic}
+                  </p>
+                  {dhikr.latin && (
+                    <p className="text-sm italic text-slate-500 leading-relaxed font-serif bg-[#FDFCF9] border-l-2 border-[#E9E3D8] pl-3 py-1">
+                      {dhikr.latin}
+                    </p>
+                  )}
+                  <p className="text-sm text-slate-600 border-l-2 border-[#2D5A43] pl-4">
+                    {dhikr.text_translation}
+                  </p>
+                </div>
+
+                {dhikr.benefit && (
+                  <div className="text-xs text-[#2D5A43] bg-[#F4F9F6] border border-emerald-100/50 rounded-2xl p-4 leading-relaxed mt-2">
+                    <span className="font-bold block mb-1 text-[#1A3A2A] uppercase tracking-wider text-[10px]">Fadhilah:</span>
+                    {dhikr.benefit}
+                  </div>
+                )}
+              </div>
+
+              {dhikr.reference && (
+                <div className="pt-4 flex items-center justify-end border-t border-[#E9E3D8]/30">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{dhikr.reference}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {dhikrs.length === 0 && (
+          <div className="col-span-full p-10 text-center text-slate-500 bg-white rounded-3xl border border-[#E9E3D8]">No Dhikrs found in this category.</div>
+        )}
+      </div>
+    </div>
+  );
+}

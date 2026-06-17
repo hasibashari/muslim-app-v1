@@ -12,16 +12,14 @@ export function InstallPrompt() {
   const [installPromptEvent, setInstallPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("noor_install_dismissed");
+    }
+    return false;
+  });
 
   useEffect(() => {
-    // Check if user previously dismissed the prompt
-    const dismissed = localStorage.getItem("noor_install_dismissed");
-    if (dismissed) {
-      setIsDismissed(true);
-      return;
-    }
-
     // Listen for the browser's beforeinstallprompt event
     const handler = (e: Event) => {
       e.preventDefault();

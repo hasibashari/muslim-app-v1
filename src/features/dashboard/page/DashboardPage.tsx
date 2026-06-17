@@ -3,13 +3,19 @@ import Link from "next/link";
 import { quranService } from "@/src/features/quran/service/quran.service";
 import { duaService } from "@/src/features/dua/service/dua.service";
 import { dhikrService } from "@/src/features/dhikr/service/dhikr.service";
-import { auth } from "@/src/features/auth/auth";
+import { cookies } from "next/headers";
 import { HeroSection } from "../components/HeroSection";
 import { RecentSurahsList } from "../components/RecentSurahsList";
 
 export default async function DashboardPage() {
-  const session = await auth();
-  const userName = session?.user?.name;
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("noor_session")?.value;
+  let userName: string | undefined = undefined;
+  if (sessionCookie) {
+    try {
+      userName = JSON.parse(decodeURIComponent(sessionCookie))?.name;
+    } catch (e) {}
+  }
 
   const allSurahs = quranService.getAllSurahs();
   const morningDua = duaService.getAllDuas()[0];

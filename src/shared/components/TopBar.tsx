@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search, User } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/src/features/auth/hooks";
 import { SearchModal } from "@/src/shared/components/SearchModal";
 
 export function TopBar() {
