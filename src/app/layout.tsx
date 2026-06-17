@@ -13,9 +13,13 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const amiri = Amiri({ subsets: ['arabic', 'latin'], weight: ['400', '700'], variable: '--font-serif' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://muslim-app-v1.vercel.app'),
   title: 'Noor - Modern Muslim App',
   description: 'Quran, Hadith, Dua, dan Dhikr — semua dalam satu aplikasi yang indah. Baca Al-Quran, pelajari Hadis, dan perkuat ibadah harianmu.',
   manifest: '/manifest.json',
+  alternates: {
+    canonical: '/',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -29,6 +33,28 @@ export const metadata: Metadata = {
     apple: [
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
+  },
+  openGraph: {
+    title: 'Noor - Modern Muslim App',
+    description: 'Quran, Hadith, Dua, dan Dhikr — semua dalam satu aplikasi yang indah.',
+    url: 'https://muslim-app-v1.vercel.app',
+    siteName: 'Noor App',
+    images: [
+      {
+        url: '/homePage.png',
+        width: 1200,
+        height: 630,
+        alt: 'Noor - Modern Muslim App',
+      },
+    ],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Noor - Modern Muslim App',
+    description: 'Quran, Hadith, Dua, dan Dhikr — semua dalam satu aplikasi yang indah.',
+    images: ['/homePage.png'],
   },
 };
 
