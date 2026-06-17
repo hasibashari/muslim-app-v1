@@ -25,8 +25,11 @@ export default function QuranPage() {
       <div className="bg-white rounded-3xl border border-[#E9E3D8] p-2 mt-4 space-y-1">
         {surahs.map((surah) => (
           <Link href={`/quran/${surah.id}`} key={surah.id} className="flex items-center gap-4 p-4 hover:bg-[#FBF9F4] rounded-2xl transition-colors cursor-pointer border-b border-transparent hover:border-[#E9E3D8]">
-            <div className="w-12 h-12 rounded-xl bg-[#FDFCF8] border border-[#E9E3D8] flex items-center justify-center font-bold text-slate-500 shrink-0">
-              {surah.id.toString().padStart(2, '0')}
+            <div 
+              className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
+              style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
+            >
+              {surah.id}
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <p className="font-bold text-lg text-[#1A3A2A] truncate">{surah.name_simple}</p>

@@ -48,7 +48,10 @@ export default async function SurahPage({ params }: { params: Promise<{ id: stri
             <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
 
             <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
-              <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center font-bold text-[#2D5A43] shrink-0 border border-[#E9E3D8]">
+              <div 
+                className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
+                style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
+              >
                 {verse.verse_number}
               </div>
             </div>
