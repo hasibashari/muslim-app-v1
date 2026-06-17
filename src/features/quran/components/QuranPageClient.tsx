@@ -51,7 +51,7 @@ export function QuranPageClient({ surahs }: QuranPageClientProps) {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#E9E3D8] p-2 space-y-0.5">
+      <div className="bg-white rounded-2xl border border-[#E9E3D8] p-2 space-y-1">
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-slate-400 font-semibold">Surah tidak ditemukan</p>
@@ -64,16 +64,16 @@ export function QuranPageClient({ surahs }: QuranPageClientProps) {
             <button
               key={surah.id}
               onClick={() => router.push(`/quran/${surah.id}`)}
-              className="w-full flex items-center gap-4 p-4 hover:bg-[#FBF9F4] rounded-2xl transition-colors cursor-pointer border border-transparent hover:border-[#E9E3D8] text-left"
+              className="w-full flex items-center gap-4 p-4 hover:bg-[#F4FAF7] rounded-xl transition-[background-color,transform,color] duration-200 cursor-pointer text-left hover:translate-x-0.5 active:scale-[0.99] group"
             >
               <div
-                className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none"
+                className="w-[34px] h-[40px] flex items-center justify-center font-bold text-xs text-[#2D5A43] shrink-0 bg-contain bg-no-repeat bg-center select-none group-hover:scale-105 transition-transform duration-200"
                 style={{ backgroundImage: "url('/ic-frame-number.svg')" }}
               >
                 {surah.id}
               </div>
               <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <p className="font-bold text-lg text-[#1A3A2A] truncate">{surah.name_simple}</p>
+                <p className="font-bold text-lg text-[#1A3A2A] truncate group-hover:text-[#2D5A43] transition-colors duration-200">{surah.name_simple}</p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                   <span>{surah.revelation_place}</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
@@ -81,7 +81,7 @@ export function QuranPageClient({ surahs }: QuranPageClientProps) {
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-2xl font-serif text-[#2D5A43]">{surah.name_arabic}</p>
+                <p className="text-2xl font-serif text-[#2D5A43] group-hover:text-[#1A3A2A] transition-colors duration-200">{surah.name_arabic}</p>
               </div>
             </button>
           ))
