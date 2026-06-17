@@ -1,24 +1,55 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Amiri } from 'next/font/google';
 import './globals.css';
 import { Sidebar } from "@/src/shared/components/Sidebar";
 import { TopBar } from "@/src/shared/components/TopBar";
 import { BottomNav } from "@/src/shared/components/BottomNav";
 import { SessionProviderWrapper } from "@/src/shared/components/SessionProviderWrapper";
+import { InstallPrompt } from "@/src/shared/components/InstallPrompt";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const amiri = Amiri({ subsets: ['arabic', 'latin'], weight: ['400', '700'], variable: '--font-serif' });
 
 export const metadata: Metadata = {
   title: 'Noor - Modern Muslim App',
-  description: 'A feature-based Next.js application containing Quran, Hadith, Dua, and Dhikr reading experiences.',
+  description: 'Quran, Hadith, Dua, dan Dhikr — semua dalam satu aplikasi yang indah. Baca Al-Quran, pelajari Hadis, dan perkuat ibadah harianmu.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Noor',
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#2D5A43',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export const dynamic = 'force-dynamic';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${amiri.variable}`}>
+    <html lang="id" className={`${inter.variable} ${amiri.variable}`}>
+      <head>
+        {/* PWA: iOS Safari meta tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png" />
+      </head>
       <body className="antialiased bg-[#FDFCF8] font-sans overflow-hidden" suppressHydrationWarning>
         <SessionProviderWrapper>
           <div className="flex h-screen w-full bg-[#FDFCF8] font-sans text-slate-800 overflow-hidden">
@@ -33,6 +64,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <BottomNav />
             </div>
           </div>
+          {/* PWA Install Prompt */}
+          <InstallPrompt />
         </SessionProviderWrapper>
       </body>
     </html>
