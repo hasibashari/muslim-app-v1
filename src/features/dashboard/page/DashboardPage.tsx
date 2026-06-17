@@ -1,4 +1,3 @@
-import { BookOpen, ScrollText } from "lucide-react";
 import Link from "next/link";
 import { quranService } from "@/src/features/quran/service/quran.service";
 import { duaService } from "@/src/features/dua/service/dua.service";
@@ -6,6 +5,7 @@ import { dhikrService } from "@/src/features/dhikr/service/dhikr.service";
 import { cookies } from "next/headers";
 import { HeroSection } from "../components/HeroSection";
 import { RecentSurahsList } from "../components/RecentSurahsList";
+import { PrayerAndCalendarWidgets } from "../components/PrayerAndCalendarWidgets";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -29,26 +29,7 @@ export default async function DashboardPage() {
 
       {/* Feature Highlights */}
       <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-2 gap-4 lg:h-full">
-        <Link 
-          href="/dhikr" 
-          className="bg-white border border-[#E9E3D8] p-6 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all cursor-pointer"
-        >
-          <div className="w-12 h-12 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-3">
-            <BookOpen size={24} />
-          </div>
-          <p className="font-bold text-[#1A3A2A]">99</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Names</p>
-        </Link>
-        <Link 
-          href="/hadith" 
-          className="bg-white border border-[#E9E3D8] p-6 rounded-3xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all cursor-pointer"
-        >
-          <div className="w-12 h-12 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-3">
-            <ScrollText size={24} />
-          </div>
-          <p className="font-bold text-[#1A3A2A]">40</p>
-          <p className="text-[10px] uppercase font-bold text-slate-400">Arba&apos;in</p>
-        </Link>
+        <PrayerAndCalendarWidgets />
         <Link 
           href={`/dhikr/${currentDhikr?.category?.toLowerCase() || ""}`}
           className="col-span-2 bg-[#F5F1EA] p-6 rounded-3xl border border-[#E9E3D8] flex items-center justify-between hover:bg-[#E9E3D8]/40 hover:border-[#2D5A43]/30 transition-all cursor-pointer"
