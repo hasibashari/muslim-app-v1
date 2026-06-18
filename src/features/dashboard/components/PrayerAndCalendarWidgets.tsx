@@ -23,6 +23,7 @@ export function PrayerAndCalendarWidgets() {
         try {
           const parsed = JSON.parse(savedCoords);
           if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setCoords(parsed);
             setLocationName(savedLocationName || "Lokasi Anda");
             return; // Use saved coordinates, do not trigger prompt!
