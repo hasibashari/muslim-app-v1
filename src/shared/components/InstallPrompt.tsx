@@ -77,7 +77,7 @@ export function InstallPrompt() {
           <div className="flex-1 min-w-0">
             <p className="font-bold text-[#1A3A2A] text-sm">Install Noor App</p>
             <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              Tambahkan ke Home Screen untuk akses cepat & mode offline.
+              Add to Home Screen for quick access & offline mode.
             </p>
 
             {/* Actions */}
@@ -95,7 +95,7 @@ export function InstallPrompt() {
                 onClick={handleDismiss}
                 className="text-xs text-slate-400 hover:text-slate-600 font-medium py-2 px-2 rounded-lg transition-colors"
               >
-                Nanti
+                Later
               </button>
             </div>
           </div>
@@ -105,7 +105,7 @@ export function InstallPrompt() {
             id="pwa-close-btn"
             onClick={handleDismiss}
             className="text-slate-300 hover:text-slate-500 transition-colors shrink-0 mt-0.5"
-            aria-label="Tutup"
+            aria-label="Close"
           >
             <X size={16} />
           </button>

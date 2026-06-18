@@ -120,7 +120,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page - 1}`}
               className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
-              title="Halaman Sebelumnya"
+              title="Previous Page"
             >
               <ChevronLeft size={18} />
             </Link>
@@ -160,7 +160,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page + 1}`}
               className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
-              title="Halaman Selanjutnya"
+              title="Next Page"
             >
               <ChevronRight size={18} />
             </Link>

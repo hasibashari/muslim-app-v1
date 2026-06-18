@@ -179,7 +179,7 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
                   ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
                   : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
                   }`}
-                title={isBookmarked ? "Hapus Bookmark" : "Simpan Bookmark"}
+                title={isBookmarked ? "Remove Bookmark" : "Save Bookmark"}
               >
                 {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
               </button>
@@ -202,7 +202,7 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
                 <Info size={18} className="text-[#2D5A43] shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-bold text-[#2D5A43] uppercase tracking-wider block">
-                    Catatan Kaki (Footnote)
+                    Footnote
                   </span>
                   <p className="leading-relaxed text-xs md:text-sm text-slate-700 whitespace-pre-line">
                     {verse.footnotes}

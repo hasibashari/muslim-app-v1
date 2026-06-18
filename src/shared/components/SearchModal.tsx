@@ -20,7 +20,7 @@ const typeConfig: Record<
     icon: <ScrollText size={14} />,
   },
   dua: {
-    label: "Doa",
+    label: "Dua",
     color: "bg-purple-50 text-purple-700",
     icon: <Sparkles size={14} />,
   },
@@ -138,7 +138,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="Cari Surah, Doa, Hadith, Dzikir..."
+              placeholder="Search Surah, Dua, Hadith, Dhikr..."
               className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 bg-transparent outline-none"
               autoComplete="off"
               spellCheck={false}
@@ -175,7 +175,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                   {[
                     { href: "/quran", label: "Al-Quran", icon: <BookOpen size={16} />, color: "text-emerald-600 bg-emerald-50" },
                     { href: "/hadith", label: "Hadith", icon: <ScrollText size={16} />, color: "text-amber-600 bg-amber-50" },
-                    { href: "/dua", label: "Doa", icon: <Sparkles size={16} />, color: "text-purple-600 bg-purple-50" },
+                    { href: "/dua", label: "Dua", icon: <Sparkles size={16} />, color: "text-purple-600 bg-purple-50" },
                     { href: "/dhikr", label: "Dhikr", icon: <RefreshCw size={16} />, color: "text-blue-600 bg-blue-50" },
                   ].map((item) => (
                     <button
@@ -196,9 +196,9 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
                   <Hash size={20} className="text-slate-400" />
                 </div>
-                <p className="font-semibold text-slate-700 text-sm">Tidak ditemukan</p>
+                <p className="font-semibold text-slate-700 text-sm">No results found</p>
                 <p className="text-xs text-slate-400 mt-1">
-                  Coba kata kunci lain untuk &ldquo;{query}&rdquo;
+                  Try another keyword for &ldquo;{query}&rdquo;
                 </p>
               </div>
             ) : (
@@ -251,11 +251,11 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           {/* Footer */}
           <div className="border-t border-[#F0EDE6] px-4 py-2.5 flex items-center justify-between">
             <p className="text-[10px] text-slate-400">
-              {hasSearched && !isLoading ? `${results.length} hasil ditemukan` : "Ketik minimal 2 karakter"}
+              {hasSearched && !isLoading ? `${results.length} results found` : "Type at least 2 characters"}
             </p>
             <div className="flex items-center gap-1 text-[10px] text-slate-400">
               <kbd className="px-1.5 py-0.5 bg-slate-100 rounded text-[10px] font-mono">ESC</kbd>
-              <span>untuk tutup</span>
+              <span>to close</span>
             </div>
           </div>
         </div>

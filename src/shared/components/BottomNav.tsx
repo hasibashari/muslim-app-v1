@@ -20,11 +20,10 @@ export function BottomNav() {
             key={href}
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] rounded-xl transition-all duration-150 ${
-              active
-                ? "text-[#2D5A43]"
-                : "text-slate-400 hover:text-[#2D5A43]"
-            }`}
+            className={`flex flex-col items-center gap-0.5 p-2 min-w-[3rem] rounded-xl transition-all duration-150 ${active
+              ? "text-[#2D5A43]"
+              : "text-slate-400 hover:text-[#2D5A43]"
+              }`}
           >
             <div className="w-8 h-8 flex items-center justify-center rounded-xl relative">
               {active && (
@@ -42,9 +41,8 @@ export function BottomNav() {
               />
             </div>
             <span
-              className={`text-[10px] font-bold tracking-tight ${
-                active ? "text-[#2D5A43]" : "text-slate-400"
-              }`}
+              className={`text-[10px] font-bold tracking-tight ${active ? "text-[#2D5A43]" : "text-slate-400"
+                }`}
             >
               {label}
             </span>

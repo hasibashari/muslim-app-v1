@@ -32,7 +32,7 @@ export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
       </Link>
 
       {/* Visually hidden h1 for SEO – visual design uses h2/h3 inside the card */}
-      <h1 className="sr-only">{surah.name_simple} — {surah.translated_name} ({surah.verses_count} Ayat)</h1>
+      <h1 className="sr-only">{surah.name_simple} — {surah.translated_name} ({surah.verses_count} Verses)</h1>
 
       {/* Surah Header Card */}
       <section className="bg-gradient-to-br from-[#2D5A43] to-[#1A3A2A] rounded-2xl p-10 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-lg shadow-[#2D5A43]/20 border border-[#2D5A43]">
@@ -43,7 +43,7 @@ export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
               ? "bg-white text-[#2D5A43] border-white"
               : "bg-white/10 text-white hover:bg-white/20 border-white/20"
             }`}
-          title={isBookmarked ? "Hapus Bookmark Surah" : "Simpan Bookmark Surah"}
+          title={isBookmarked ? "Remove Surah Bookmark" : "Save Surah Bookmark"}
         >
           {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>

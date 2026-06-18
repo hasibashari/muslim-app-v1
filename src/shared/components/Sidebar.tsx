@@ -1,13 +1,30 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import { navItems, isNavActive } from "@/src/shared/constants/nav";
 
+const VERSES = [
+  { text: "So remember Me; I will remember you.", reference: "Al-Baqarah 152" },
+  { text: "For indeed, with hardship [will be] ease.", reference: "Al-Sharh 5" },
+  { text: "Indeed, I am near. I respond to the invocation of the supplicant when he calls upon Me.", reference: "Al-Baqarah 186" },
+  { text: "And Allah is the best of planners.", reference: "Al-Anfal 30" },
+  { text: "So do not weaken and do not grieve, and you will be superior if you are [true] believers.", reference: "Al-Imran 139" },
+  { text: "Indeed, Allah loves those who rely [upon Him].", reference: "Al-Imran 159" },
+  { text: "If you are grateful, I will surely increase you [in favor].", reference: "Ibrahim 7" }
+];
+
 export function Sidebar() {
   const pathname = usePathname();
+  const [dailyVerse, setDailyVerse] = useState(VERSES[0]);
+
+  useEffect(() => {
+    const day = new Date().getDate();
+    setDailyVerse(VERSES[day % VERSES.length]);
+  }, []);
 
   return (
     <aside className="hidden md:flex w-64 bg-white border-r border-[#E9E3D8] flex-col h-full z-10 shrink-0 overflow-y-auto scrollbar-hide">
@@ -50,8 +67,8 @@ export function Sidebar() {
       <div className="mt-auto p-6">
         <div className="bg-[#F5F1EA] rounded-2xl p-5 border border-[#E9E3D8]">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Daily Verse</p>
-          <p className="text-sm italic leading-relaxed text-slate-700">&quot;So remember Me; I will remember you.&quot;</p>
-          <p className="text-[10px] mt-2 font-medium text-[#2D5A43]">Al-Baqarah 152</p>
+          <p className="text-sm italic leading-relaxed text-slate-700">&quot;{dailyVerse.text}&quot;</p>
+          <p className="text-[10px] mt-2 font-medium text-[#2D5A43]">{dailyVerse.reference}</p>
         </div>
       </div>
     </aside>

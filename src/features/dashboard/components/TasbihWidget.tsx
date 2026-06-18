@@ -11,11 +11,11 @@ interface DhikrPreset {
 }
 
 const PRESETS: DhikrPreset[] = [
-  { id: "subhanallah", indonesian: "Subhanallah", arabic: "سُبْحَانَ ٱللَّٰهِ", meaning: "Maha Suci Allah" },
-  { id: "alhamdulillah", indonesian: "Alhamdulillah", arabic: "ٱلْحَمْدُ لِلَّٰهِ", meaning: "Segala Puji Bagi Allah" },
-  { id: "allahuakbar", indonesian: "Allahu Akbar", arabic: "ٱللَّٰهُ أَكْبَرُ", meaning: "Allah Maha Besar" },
-  { id: "astaghfirullah", indonesian: "Astaghfirullah", arabic: "أَسْتَغْفِرُ ٱللَّٰهَ", meaning: "Aku Memohon Ampun Kepada Allah" },
-  { id: "lailahaillallah", indonesian: "La ilaha illallah", arabic: "لَا إِلَٰهَ إِلَّا ٱللَّٰهُ", meaning: "Tiada Tuhan Selain Allah" },
+  { id: "subhanallah", indonesian: "Subhanallah", arabic: "سُبْحَانَ ٱللَّٰهِ", meaning: "Glory be to Allah" },
+  { id: "alhamdulillah", indonesian: "Alhamdulillah", arabic: "ٱلْحَمْدُ لِلَّٰهِ", meaning: "Praise be to Allah" },
+  { id: "allahuakbar", indonesian: "Allahu Akbar", arabic: "ٱللَّٰهُ أَكْبَرُ", meaning: "Allah is Greatest" },
+  { id: "astaghfirullah", indonesian: "Astaghfirullah", arabic: "أَسْتَغْفِرُ ٱللَّٰهَ", meaning: "I seek forgiveness from Allah" },
+  { id: "lailahaillallah", indonesian: "La ilaha illallah", arabic: "لَا إِلَٰهَ إِلَّا ٱللَّٰهُ", meaning: "There is no deity but Allah" },
 ];
 
 export function TasbihWidget() {
@@ -128,7 +128,7 @@ export function TasbihWidget() {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Sparkles className="text-[#2D5A43] w-5 h-5" />
-          <h3 className="text-lg font-bold text-[#1A3A2A]">Tasbih Digital</h3>
+          <h3 className="text-lg font-bold text-[#1A3A2A]">Digital Tasbih</h3>
         </div>
         <div className="flex items-center gap-1.5">
           {/* Haptic Toggle Button */}
@@ -139,7 +139,7 @@ export function TasbihWidget() {
                 ? "bg-emerald-50 border-emerald-200 text-[#2D5A43] hover:bg-emerald-100" 
                 : "bg-slate-50 border-slate-200 text-slate-400 hover:bg-slate-100"
             }`}
-            title={hapticEnabled ? "Haptic Getaran Aktif" : "Haptic Getaran Nonaktif"}
+            title={hapticEnabled ? "Haptic Vibration On" : "Haptic Vibration Off"}
           >
             {hapticEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
           </button>
@@ -152,7 +152,7 @@ export function TasbihWidget() {
                 ? "bg-[#2D5A43] border-[#2D5A43] text-white" 
                 : "bg-white border-[#E9E3D8] text-slate-500 hover:bg-[#F5F1EA]"
             }`}
-            title="Pengaturan Tasbih"
+            title="Tasbih Settings"
           >
             <Settings size={16} />
           </button>
@@ -164,11 +164,11 @@ export function TasbihWidget() {
         {/* Toggleable Settings Panel */}
         {showSettings ? (
           <div className="w-full space-y-4 animate-in fade-in duration-200">
-            <h4 className="text-sm font-bold text-[#1A3A2A] border-b border-[#E9E3D8]/50 pb-2">Pengaturan Tasbih</h4>
+            <h4 className="text-sm font-bold text-[#1A3A2A] border-b border-[#E9E3D8]/50 pb-2">Tasbih Settings</h4>
             
             {/* Target Select */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 block">Target Hitungan</label>
+              <label className="text-xs font-bold text-slate-500 block">Count Target</label>
               <div className="grid grid-cols-4 gap-1.5 bg-[#F5F1EA]/60 p-1 rounded-xl">
                 {([33, 99, 100, "infinity"] as const).map((t) => (
                   <button
@@ -191,7 +191,7 @@ export function TasbihWidget() {
 
             {/* Presets List */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 block">Pilih Dzikir</label>
+              <label className="text-xs font-bold text-slate-500 block">Select Dhikr</label>
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
                 {PRESETS.map((preset) => (
                   <button
@@ -218,7 +218,7 @@ export function TasbihWidget() {
           /* Main Interactive View */
           <>
             {/* Upper: Selected Dhikr Info */}
-            <div className="text-center w-full cursor-pointer select-none" onClick={cyclePreset} title="Klik untuk ganti dzikir">
+            <div className="text-center w-full cursor-pointer select-none" onClick={cyclePreset} title="Click to cycle dhikr">
               <div className="text-xs font-bold text-[#2D5A43] bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full w-fit mx-auto mb-2 tracking-wide uppercase">
                 {currentPreset.indonesian}
               </div>
@@ -281,7 +281,7 @@ export function TasbihWidget() {
               <button
                 onClick={handleReset}
                 className="flex items-center gap-1.5 text-[#2D5A43] hover:text-rose-700 bg-[#F5F1EA] hover:bg-rose-50 hover:border-rose-100 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all border border-transparent cursor-pointer"
-                title="Reset Hitungan"
+                title="Reset Count"
               >
                 <RotateCcw size={12} />
                 Reset
@@ -290,7 +290,7 @@ export function TasbihWidget() {
               {/* Target Complete Text Alert */}
               {isTargetMet && (
                 <span className="text-[10px] font-extrabold text-amber-600 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-lg animate-bounce select-none">
-                  Target Tercapai! 🎉
+                  Target Reached! 🎉
                 </span>
               )}
 

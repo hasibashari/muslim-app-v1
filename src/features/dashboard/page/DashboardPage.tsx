@@ -22,19 +22,19 @@ export default async function DashboardPage() {
   const allDhikrs = dhikrService.getAllDhikrs();
 
   return (
-    <div className="p-6 md:p-10 w-full max-w-6xl mx-auto flex flex-col lg:grid lg:grid-cols-12 gap-8 content-start">
+    <div className="p-6 md:p-10 w-full max-w-6xl mx-auto flex flex-col md:grid md:grid-cols-2 lg:grid-cols-12 gap-8 content-start">
 
       {/* Hero Welcome */}
       <HeroSection userName={userName} />
 
       {/* Feature Highlights */}
-      <div className="lg:col-span-4 grid grid-cols-2 md:grid-cols-2 gap-4 lg:h-full">
+      <div className="md:col-span-2 lg:col-span-4 grid grid-cols-2 gap-4 lg:h-full">
         <PrayerAndCalendarWidgets />
         <CurrentDhikrWidget allDhikrs={allDhikrs} />
       </div>
 
       {/* Feature Lists */}
-      <div className="lg:col-span-6 space-y-4">
+      <div className="md:col-span-1 lg:col-span-6 space-y-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-bold text-[#1A3A2A]">Recent Surahs</h3>
           <Link href="/quran" className="text-xs font-bold text-[#2D5A43] hover:underline">View All</Link>
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         <RecentSurahsList allSurahs={allSurahs} />
       </div>
 
-      <div className="lg:col-span-6">
+      <div className="md:col-span-1 lg:col-span-6">
         <TasbihWidget />
       </div>
     </div>

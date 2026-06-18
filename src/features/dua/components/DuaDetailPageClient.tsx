@@ -94,7 +94,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
         >
           <div className="flex items-center gap-2 text-[#2D5A43] min-w-0">
             <BookOpen size={16} className="shrink-0" />
-            <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase truncate">Referensi & Penjelasan</span>
+            <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase truncate">References & Explanation</span>
           </div>
           {isRefExpanded ? (
             <ChevronUp size={16} className="text-slate-400 shrink-0" />
@@ -122,7 +122,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 w-full max-w-3xl mx-auto flex flex-col gap-6">
+    <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
       <Link href="/dua" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit">
         <ArrowLeft size={16} />
         Back to Supplications
@@ -136,7 +136,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
               ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
               : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
             }`}
-          title={isBookmarked ? "Hapus Bookmark Doa" : "Simpan Bookmark Doa"}
+          title={isBookmarked ? "Remove Dua Bookmark" : "Save Dua Bookmark"}
         >
           {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
@@ -183,7 +183,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
           >
             <ChevronLeft size={18} className="text-[#2D5A43] group-hover:-translate-x-1 transition-transform shrink-0" />
             <div className="flex flex-col text-left overflow-hidden">
-              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sebelumnya</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Previous</span>
               <span className="text-xs md:text-sm font-bold text-[#1A3A2A] truncate hidden sm:block">{prev.title}</span>
             </div>
           </Link>
@@ -197,7 +197,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
             className="flex-1 max-w-[240px] bg-white rounded-2xl border border-[#E9E3D8] p-2.5 sm:p-3 md:p-4 flex items-center justify-between gap-1.5 sm:gap-2 md:gap-3 hover:bg-[#FBF9F4] transition-colors group shadow-sm text-right"
           >
             <div className="flex flex-col text-right overflow-hidden ml-auto">
-              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Selanjutnya</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Next</span>
               <span className="text-xs md:text-sm font-bold text-[#1A3A2A] truncate hidden sm:block">{next.title}</span>
             </div>
             <ChevronRight size={18} className="text-[#2D5A43] group-hover:translate-x-1 transition-transform shrink-0" />

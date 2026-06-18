@@ -87,7 +87,7 @@ export function HadithDetailPageClient({
     const bookmarkData = {
       item_type: "hadith" as const,
       item_id: itemId,
-      title: `${hadithCollection.name} • Hadits #${hadith.hadith_number}`,
+      title: `${hadithCollection.name} • Hadith #${hadith.hadith_number}`,
       subtitle: hadith.text_en.length > 60 ? `${hadith.text_en.substring(0, 60)}...` : hadith.text_en,
       created_at: new Date().toISOString(),
     };
@@ -134,11 +134,11 @@ export function HadithDetailPageClient({
         <div className="flex flex-col gap-1">
           <h1 className="text-4xl font-bold text-[#1A3A2A] font-serif">{hadithCollection.name}</h1>
           <p className="text-slate-400 font-semibold uppercase tracking-widest text-xs">
-            Total {hadithCollection.total_hadith} Hadits
+            Total {hadithCollection.total_hadith} Hadiths
           </p>
         </div>
         <p className="text-xs font-semibold text-slate-500 bg-[#F5F1EA] px-3.5 py-1.5 rounded-full border border-[#E9E3D8]">
-          Menampilkan {startItem} - {endItem} dari {hadithCollection.total_hadith}
+          Showing {startItem} - {endItem} of {hadithCollection.total_hadith}
         </p>
       </div>
 
@@ -164,7 +164,7 @@ export function HadithDetailPageClient({
                       ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
                       : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
                     }`}
-                  title={isBookmarked ? "Hapus Bookmark Hadits" : "Simpan Bookmark Hadits"}
+                  title={isBookmarked ? "Remove Hadith Bookmark" : "Save Hadith Bookmark"}
                 >
                   {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
                 </button>
@@ -194,7 +194,7 @@ export function HadithDetailPageClient({
             <Link
               href={`/hadith/${collectionId}?page=${page - 1}`}
               className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
-              title="Halaman Sebelumnya"
+              title="Previous Page"
             >
               <ChevronLeft size={18} />
             </Link>
@@ -232,7 +232,7 @@ export function HadithDetailPageClient({
             <Link
               href={`/hadith/${collectionId}?page=${page + 1}`}
               className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
-              title="Halaman Selanjutnya"
+              title="Next Page"
             >
               <ChevronRight size={18} />
             </Link>

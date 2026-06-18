@@ -26,7 +26,7 @@ export function HeroSection({ userName }: HeroSectionProps) {
   const greeting = userName ? `Assalamu Alaikum, ${userName}` : "Assalamu Alaikum";
 
   return (
-    <section className="lg:col-span-8 bg-[#2D5A43] rounded-2xl p-8 md:p-10 text-white relative overflow-hidden">
+    <section className="md:col-span-2 lg:col-span-8 bg-[#2D5A43] rounded-2xl p-8 md:p-10 text-white relative overflow-hidden">
       <div className="relative z-10">
         <h2 className="text-2xl md:text-3xl font-bold mb-2">{greeting}</h2>
         <p className="text-emerald-100/80 mb-8 max-w-md text-sm md:text-base">

@@ -166,7 +166,7 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
                     ? "text-[#2D5A43] bg-emerald-50 border-emerald-100"
                     : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-transparent"
                     }`}
-                  title={isBookmarked ? "Hapus Bookmark Dzikir" : "Simpan Bookmark Dzikir"}
+                  title={isBookmarked ? "Remove Dhikr Bookmark" : "Save Dhikr Bookmark"}
                 >
                   {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
                 </button>
@@ -199,7 +199,7 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
                             ? "text-white bg-[#2D5A43] border-[#2D5A43]"
                             : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border-[#E9E3D8]"
                             }`}
-                          title={expandedBenefits[dhikr.id] ? "Sembunyikan Fadhilah" : "Lihat Fadhilah"}
+                          title={expandedBenefits[dhikr.id] ? "Hide Virtue" : "View Virtue"}
                         >
                           <Info size={16} />
                         </button>
@@ -212,7 +212,7 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
 
                   {dhikr.benefit && expandedBenefits[dhikr.id] && (
                     <div className="text-xs text-[#2D5A43] bg-[#F4F9F6] border border-emerald-100/50 rounded-2xl p-4 leading-relaxed mt-2 animate-fadeIn">
-                      <span className="font-bold block mb-1 text-[#1A3A2A] uppercase tracking-wider text-[10px]">Fadhilah:</span>
+                      <span className="font-bold block mb-1 text-[#1A3A2A] uppercase tracking-wider text-[10px]">Virtue:</span>
                       {dhikr.benefit}
                     </div>
                   )}

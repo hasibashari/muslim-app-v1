@@ -25,7 +25,7 @@ export function PrayerAndCalendarWidgets() {
           if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setCoords(parsed);
-            setLocationName(savedLocationName || "Lokasi Anda");
+            setLocationName(savedLocationName || "Your Location");
             return; // Use saved coordinates, do not trigger prompt!
           }
         } catch (e) {
@@ -42,9 +42,9 @@ export function PrayerAndCalendarWidgets() {
               longitude: position.coords.longitude,
             };
             setCoords(newCoords);
-            setLocationName("Lokasi Anda");
+            setLocationName("Your Location");
             localStorage.setItem("noor_user_coords", JSON.stringify(newCoords));
-            localStorage.setItem("noor_location_name", "Lokasi Anda");
+            localStorage.setItem("noor_location_name", "Your Location");
           },
           (error) => {
             console.log("Using default location (Jakarta) due to: ", error.message);
@@ -66,11 +66,11 @@ export function PrayerAndCalendarWidgets() {
 
       // Calculate Hijri Date using native Intl API
       try {
-        const formatterDate = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
+        const formatterDate = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", {
           day: "numeric",
           month: "long",
         });
-        const formatterYear = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
+        const formatterYear = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", {
           year: "numeric",
         });
         setHijriDate(formatterDate.format(now));
@@ -94,11 +94,11 @@ export function PrayerAndCalendarWidgets() {
   // 4. Find the next prayer time
   const getNextPrayer = () => {
     const list = [
-      { name: "Subuh", time: times.Fajr },
-      { name: "Dzuhur", time: times.Dhuhr },
-      { name: "Ashar", time: times.Asr },
+      { name: "Fajr", time: times.Fajr },
+      { name: "Dhuhr", time: times.Dhuhr },
+      { name: "Asr", time: times.Asr },
       { name: "Maghrib", time: times.Maghrib },
-      { name: "Isya", time: times.Isha },
+      { name: "Isha", time: times.Isha },
     ];
 
     for (const p of list) {
@@ -117,12 +117,12 @@ export function PrayerAndCalendarWidgets() {
       {/* Prayer Time Widget */}
       <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
-        title={`Jadwal shalat hari ini untuk ${locationName}`}
+        title={`Today's prayer times for ${locationName}`}
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Clock size={20} />
         </div>
-        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Jadwal Sholat</p>
+        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Prayer Schedule</p>
         <p className="font-bold text-[#1A3A2A] text-lg mt-0.5">{nextPrayer.name}</p>
         <p className="text-xs font-bold text-[#2D5A43] bg-[#F0F4F2] px-3 py-1 rounded-full mt-2 transition-all">
           {nextPrayer.time}
@@ -132,12 +132,12 @@ export function PrayerAndCalendarWidgets() {
       {/* Hijri Calendar Widget */}
       <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
-        title="Tanggal Hijriah hari ini"
+        title="Today's Hijri date"
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Calendar size={20} />
         </div>
-        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijriah</p>
+        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijri</p>
         <p className="font-bold text-[#1A3A2A] text-sm mt-1 truncate max-w-full px-1">{hijriDate}</p>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{hijriYear}</p>
       </div>
