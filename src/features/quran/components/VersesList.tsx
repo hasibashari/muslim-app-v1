@@ -7,6 +7,7 @@ import { useSettings } from "@/src/features/settings/hooks";
 import { useSession } from "@/src/features/auth/hooks";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db, isConfigured } from "@/src/lib/firebase";
+import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
 
 interface VersesListProps {
   verses: Verse[];
@@ -19,24 +20,19 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
   const { data: session, status } = useSession();
 
   const [expandedFootnotes, setExpandedFootnotes] = useState<Record<number, boolean>>({});
-  const [bookmarkedVerses, setBookmarkedVerses] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== "undefined") {
-      const localData = localStorage.getItem("noor_bookmarks");
-      if (localData) {
-        try {
-          const parsed = JSON.parse(localData) as any[];
-          const bookmarked: Record<string, boolean> = {};
-          parsed.forEach((b) => {
-            if (b.item_type === "quran" && b.item_id.startsWith(`${surahId}:`)) {
-              bookmarked[b.item_id] = true;
-            }
-          });
-          return bookmarked;
-        } catch (e) { }
-      }
+  const [bookmarkedVerses, setBookmarkedVerses] = useState<Record<string, boolean>>(
+    () => {
+      if (typeof window === "undefined") return {};
+      const allBookmarks = readLocalBookmarks();
+      const bookmarked: Record<string, boolean> = {};
+      allBookmarks.forEach((b) => {
+        if (b.item_type === "quran" && b.item_id.startsWith(`${surahId}:`)) {
+          bookmarked[b.item_id] = true;
+        }
+      });
+      return bookmarked;
     }
-    return {};
-  });
+  );
 
   // 1. Fetch bookmarked verses for this Surah in Firestore
   useEffect(() => {
@@ -85,19 +81,22 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
         }
       } catch (err) {
         console.error("Failed to update verse bookmark in Firestore:", err);
+        // Revert optimistic update
+        setBookmarkedVerses((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     } else {
       try {
-        const localData = localStorage.getItem("noor_bookmarks");
-        let bookmarks = localData ? JSON.parse(localData) : [];
+        let bookmarks = readLocalBookmarks();
         if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "quran" && b.item_id === itemId));
+          bookmarks = bookmarks.filter((b) => !(b.item_type === "quran" && b.item_id === itemId));
         } else {
           bookmarks.push(bookmarkData);
         }
-        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
+        writeLocalBookmarks(bookmarks);
       } catch (e) {
         console.error("Failed to update local bookmarks:", e);
+        // Revert optimistic update
+        setBookmarkedVerses((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     }
   };
@@ -162,7 +161,7 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
         const isBookmarked = !!bookmarkedVerses[itemId];
 
         return (
-          <div key={verse.id} id={`verse-${verse.verse_number}`} className="bg-white rounded-xl p-6 md:p-8 flex flex-col gap-6 relative shadow-sm hover:shadow-md hover:bg-[#FAF9F5]/50 transition-all duration-300">
+          <div key={verse.id} id={`verse-${verse.verse_number}`} className="bg-white rounded-2xl p-6 md:p-8 flex flex-col gap-6 relative shadow-sm hover:shadow-md hover:bg-[#FAF9F5]/50 transition-all duration-300">
             <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md"></div>
 
             <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4">
@@ -187,7 +186,7 @@ export function VersesList({ verses, surahId, surahName }: VersesListProps) {
             </div>
 
             <div className="flex flex-col gap-8">
-              <p className={`${getArabicFontSizeClass()} font-serif text-right text-[#1A3A2A]`} dir="rtl">
+              <p className={`${getArabicFontSizeClass()} font-serif text-right text-[#2D5A43]`} dir="rtl">
                 {verse.text_arabic}
               </p>
               {settings.showTranslation && (

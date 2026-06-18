@@ -1,28 +1,11 @@
 import { duaService } from "@/src/features/dua/service/dua.service";
 import { Sparkles, ChevronLeft, ChevronRight, FolderOpen, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { getPageNumbers } from "@/src/shared/utils/pagination";
 
 interface PageProps {
   searchParams?: Promise<{ q?: string; page?: string; category?: string }>;
 }
-
-const getPageNumbers = (current: number, total: number) => {
-  const pages: (number | string)[] = [];
-  const delta = 2; // How many pages before and after current page
-
-  for (let i = 1; i <= total; i++) {
-    if (
-      i === 1 ||
-      i === total ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      pages.push(i);
-    } else if (pages[pages.length - 1] !== '...') {
-      pages.push('...');
-    }
-  }
-  return pages;
-};
 
 export default async function DuaPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
@@ -136,13 +119,13 @@ export default async function DuaPage({ searchParams }: PageProps) {
           {page > 1 ? (
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page - 1}`}
-              className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
+              className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
               title="Halaman Sebelumnya"
             >
               <ChevronLeft size={18} />
             </Link>
           ) : (
-            <span className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
+            <span className="w-10 h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
               <ChevronLeft size={18} />
             </span>
           )}
@@ -161,7 +144,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
               <Link
                 key={`page-${p}`}
                 href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${p}`}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all shadow-sm ${isCurrent
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm ${isCurrent
                     ? 'bg-[#2D5A43] text-white border border-[#2D5A43]'
                     : 'bg-white text-slate-600 border border-[#E9E3D8] hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30'
                   }`}
@@ -176,13 +159,13 @@ export default async function DuaPage({ searchParams }: PageProps) {
           {page < totalPages ? (
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page + 1}`}
-              className="w-10 h-10 rounded-xl bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
+              className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
               title="Halaman Selanjutnya"
             >
               <ChevronRight size={18} />
             </Link>
           ) : (
-            <span className="w-10 h-10 rounded-xl bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
+            <span className="w-10 h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
               <ChevronRight size={18} />
             </span>
           )}

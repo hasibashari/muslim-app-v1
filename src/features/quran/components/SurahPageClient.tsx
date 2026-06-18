@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bookmark, BookmarkCheck } from "lucide-react";
 import { LastReadTracker } from "@/src/features/quran/components/LastReadTracker";
 import { VersesList } from "./VersesList";
 import type { Surah, Verse } from "../types";
-import { useSession } from "@/src/features/auth/hooks";
-import { collection, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
-import { db, isConfigured } from "@/src/lib/firebase";
+import { useBookmark } from "@/src/shared/hooks/useBookmark";
 
 interface SurahPageClientProps {
   surah: Surah;
@@ -16,74 +13,15 @@ interface SurahPageClientProps {
 }
 
 export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
-  const { data: session, status } = useSession();
-  const [isBookmarked, setIsBookmarked] = useState(() => {
-    if (typeof window !== "undefined") {
-      const itemId = String(surah.id);
-      const localData = localStorage.getItem("noor_bookmarks");
-      if (localData) {
-        try {
-          const parsed = JSON.parse(localData) as any[];
-          return parsed.some((b) => b.item_type === "quran" && b.item_id === itemId);
-        } catch (e) { }
-      }
-    }
-    return false;
-  });
-
-  // 1. Check if Surah is bookmarked in Firestore
-  useEffect(() => {
-    const itemId = String(surah.id);
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      const docId = `quran_${itemId}`;
-      const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-      getDoc(docRef).then((snap) => {
-        setIsBookmarked(snap.exists());
-      }).catch((err) => console.error("Error loading Surah bookmark:", err));
-    }
-  }, [status, session?.user?.id, surah.id]);
-
-  // 2. Toggle Surah bookmark
-  const toggleSurahBookmark = async () => {
-    const itemId = String(surah.id);
-    const currentlyBookmarked = isBookmarked;
-    setIsBookmarked(!currentlyBookmarked);
-
-    const bookmarkData = {
-      item_type: "quran" as const,
-      item_id: itemId,
+  const { isBookmarked, toggleBookmark } = useBookmark({
+    docPrefix: "quran",
+    bookmarkData: {
+      item_type: "quran",
+      item_id: String(surah.id),
       title: surah.name_simple,
       subtitle: `Surah • ${surah.translated_name}`,
-      created_at: new Date().toISOString(),
-    };
-
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      try {
-        const docId = `quran_${itemId}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-        if (currentlyBookmarked) {
-          await deleteDoc(docRef);
-        } else {
-          await setDoc(docRef, bookmarkData);
-        }
-      } catch (err) {
-        console.error("Failed to toggle Surah bookmark in Firestore:", err);
-      }
-    } else {
-      try {
-        const localData = localStorage.getItem("noor_bookmarks");
-        let bookmarks = localData ? JSON.parse(localData) : [];
-        if (currentlyBookmarked) {
-          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "quran" && b.item_id === itemId));
-        } else {
-          bookmarks.push(bookmarkData);
-        }
-        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
-      } catch (e) {
-        console.error("Failed to toggle local Surah bookmark:", e);
-      }
-    }
-  };
+    },
+  });
 
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
@@ -93,18 +31,21 @@ export function SurahPageClient({ surah, verses }: SurahPageClientProps) {
         Back to Surahs
       </Link>
 
+      {/* Visually hidden h1 for SEO – visual design uses h2/h3 inside the card */}
+      <h1 className="sr-only">{surah.name_simple} — {surah.translated_name} ({surah.verses_count} Ayat)</h1>
+
       {/* Surah Header Card */}
       <section className="bg-gradient-to-br from-[#2D5A43] to-[#1A3A2A] rounded-2xl p-10 text-white relative overflow-hidden flex flex-col items-center justify-center text-center shadow-lg shadow-[#2D5A43]/20 border border-[#2D5A43]">
         {/* Bookmark Button */}
         <button
-          onClick={toggleSurahBookmark}
+          onClick={toggleBookmark}
           className={`absolute top-6 right-6 p-3 rounded-2xl transition-all cursor-pointer backdrop-blur-md shadow-sm border ${isBookmarked
               ? "bg-white text-[#2D5A43] border-white"
               : "bg-white/10 text-white hover:bg-white/20 border-white/20"
             }`}
           title={isBookmarked ? "Hapus Bookmark Surah" : "Simpan Bookmark Surah"}
         >
-          {isBookmarked ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+          {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
 
         <div className="relative z-10 flex flex-col items-center">

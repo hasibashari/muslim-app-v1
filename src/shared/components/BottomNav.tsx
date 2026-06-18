@@ -2,24 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
-
-const navItems = [
-  { href: "/", icon: Home, label: "Home", exact: true },
-  { href: "/quran", icon: BookOpen, label: "Quran", exact: false },
-  { href: "/hadith", icon: ScrollText, label: "Hadith", exact: false },
-  { href: "/dua", icon: Sparkles, label: "Dua", exact: false },
-  { href: "/dhikr", icon: RefreshCw, label: "Dhikr", exact: false },
-];
+import { navItems, isNavActive } from "@/src/shared/constants/nav";
 
 export function BottomNav() {
   const pathname = usePathname();
-
-  const isActive = (href: string, exact: boolean) => {
-    if (exact) return pathname === href;
-    return pathname === href || pathname.startsWith(href + "/");
-  };
 
   return (
     <nav
@@ -27,7 +14,7 @@ export function BottomNav() {
       className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-[#E9E3D8] flex items-center justify-around h-16 px-1 z-30"
     >
       {navItems.map(({ href, icon: Icon, label, exact }) => {
-        const active = isActive(href, exact);
+        const active = isNavActive(pathname, href, exact);
         return (
           <Link
             key={href}

@@ -210,7 +210,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="p-6 md:p-10 w-full max-w-4xl mx-auto">
       {/* Page Title */}
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-[#1A3A2A]">Profile & Settings</h1>

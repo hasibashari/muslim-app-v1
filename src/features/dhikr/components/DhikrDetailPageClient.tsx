@@ -6,6 +6,7 @@ import { ArrowLeft, Bookmark, BookmarkCheck, Info } from "lucide-react";
 import { useSession } from "@/src/features/auth/hooks";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db, isConfigured } from "@/src/lib/firebase";
+import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
 
 interface Dhikr {
   id: number;
@@ -50,18 +51,13 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
         setBookmarkedDhikrs(bookmarked);
       }).catch((err) => console.error("Error fetching dhikr bookmarks:", err));
     } else if (status !== "loading") {
-      const localData = localStorage.getItem("noor_bookmarks");
-      let bookmarked: Record<string, boolean> = {};
-      if (localData) {
-        try {
-          const parsed = JSON.parse(localData) as any[];
-          parsed.forEach((b) => {
-            if (b.item_type === "dhikr" && b.category === category) {
-              bookmarked[b.item_id] = true;
-            }
-          });
-        } catch (e) { }
-      }
+      const allBookmarks = readLocalBookmarks();
+      const bookmarked: Record<string, boolean> = {};
+      allBookmarks.forEach((b) => {
+        if (b.item_type === "dhikr" && b.category === category) {
+          bookmarked[b.item_id] = true;
+        }
+      });
       const timer = setTimeout(() => {
         setBookmarkedDhikrs(bookmarked);
       }, 0);
@@ -107,19 +103,22 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
         }
       } catch (err) {
         console.error("Failed to toggle dhikr bookmark in Firestore:", err);
+        // Revert optimistic update
+        setBookmarkedDhikrs((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     } else {
       try {
-        const localData = localStorage.getItem("noor_bookmarks");
-        let bookmarks = localData ? JSON.parse(localData) : [];
+        let bookmarks = readLocalBookmarks();
         if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "dhikr" && b.item_id === itemId));
+          bookmarks = bookmarks.filter((b) => !(b.item_type === "dhikr" && b.item_id === itemId));
         } else {
           bookmarks.push(bookmarkData);
         }
-        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
+        writeLocalBookmarks(bookmarks);
       } catch (e) {
         console.error("Failed to toggle local dhikr bookmark:", e);
+        // Revert optimistic update
+        setBookmarkedDhikrs((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     }
   };
@@ -142,7 +141,9 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
           const isBookmarked = !!bookmarkedDhikrs[itemId];
 
           return (
-            <div key={dhikr.id} className="bg-white rounded-2xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between relative">
+            <div key={dhikr.id} className="bg-white rounded-2xl border border-[#E9E3D8] p-6 lg:p-8 flex flex-col gap-6 shadow-sm h-full justify-between relative overflow-hidden">
+              {/* Left accent bar – visual consistency with Quran & Hadith cards */}
+              <div className="absolute top-8 left-0 w-1 h-12 bg-[#2D5A43] rounded-r-md" />
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center border-b border-[#E9E3D8]/50 pb-4 gap-4 pr-12">
                   <div

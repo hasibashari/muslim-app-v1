@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, BookmarkCheck, BookOpen, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
-import { useSession } from "@/src/features/auth/hooks";
-import { collection, doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
-import { db, isConfigured } from "@/src/lib/firebase";
+import { useBookmark } from "@/src/shared/hooks/useBookmark";
 
 import type { Dua } from "../types";
 
@@ -21,33 +19,17 @@ interface DuaDetailPageClientProps {
 }
 
 export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProps) {
-  const { data: session, status } = useSession();
   const [isRefExpanded, setIsRefExpanded] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(() => {
-    if (typeof window !== "undefined") {
-      const itemId = String(dua.id);
-      const localData = localStorage.getItem("noor_bookmarks");
-      if (localData) {
-        try {
-          const parsed = JSON.parse(localData) as any[];
-          return parsed.some((b) => b.item_type === "dua" && b.item_id === itemId);
-        } catch (e) { }
-      }
-    }
-    return false;
-  });
 
-  // 1. Check if Dua is bookmarked in Firestore
-  useEffect(() => {
-    const itemId = String(dua.id);
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      const docId = `dua_${itemId}`;
-      const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-      getDoc(docRef).then((snap) => {
-        setIsBookmarked(snap.exists());
-      }).catch((err) => console.error("Error loading Dua bookmark:", err));
-    }
-  }, [status, session?.user?.id, dua.id]);
+  const { isBookmarked, toggleBookmark } = useBookmark({
+    docPrefix: "dua",
+    bookmarkData: {
+      item_type: "dua",
+      item_id: String(dua.id),
+      title: dua.title,
+      subtitle: `Dua • ${dua.category || "Supplication"}`,
+    },
+  });
 
   // Track last read Dua ID
   useEffect(() => {
@@ -55,48 +37,6 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
       localStorage.setItem("noor_last_read_dua_id", String(dua.id));
     }
   }, [dua.id]);
-
-  // 2. Toggle bookmark
-  const toggleBookmark = async () => {
-    const itemId = String(dua.id);
-    const currentlyBookmarked = isBookmarked;
-    setIsBookmarked(!currentlyBookmarked);
-
-    const bookmarkData = {
-      item_type: "dua" as const,
-      item_id: itemId,
-      title: dua.title,
-      subtitle: `Dua • ${dua.category || "Supplication"}`,
-      created_at: new Date().toISOString(),
-    };
-
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      try {
-        const docId = `dua_${itemId}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-        if (currentlyBookmarked) {
-          await deleteDoc(docRef);
-        } else {
-          await setDoc(docRef, bookmarkData);
-        }
-      } catch (err) {
-        console.error("Failed to toggle Dua bookmark in Firestore:", err);
-      }
-    } else {
-      try {
-        const localData = localStorage.getItem("noor_bookmarks");
-        let bookmarks = localData ? JSON.parse(localData) : [];
-        if (currentlyBookmarked) {
-          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "dua" && b.item_id === itemId));
-        } else {
-          bookmarks.push(bookmarkData);
-        }
-        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
-      } catch (e) {
-        console.error("Failed to toggle local Dua bookmark:", e);
-      }
-    }
-  };
 
   const renderReference = (refText: string) => {
     // 1. Separate Source
@@ -198,7 +138,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
             }`}
           title={isBookmarked ? "Hapus Bookmark Doa" : "Simpan Bookmark Doa"}
         >
-          {isBookmarked ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
+          {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
 
         <div className="flex flex-col gap-2 border-b border-[#E9E3D8]/50 pb-4 pr-10 sm:pr-12">

@@ -3,24 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, BookOpen, ScrollText, Sparkles, RefreshCw } from "lucide-react";
 import { motion } from "motion/react";
-
-const navItems = [
-  { href: "/", icon: Home, label: "Home", exact: true },
-  { href: "/quran", icon: BookOpen, label: "Quran", exact: false },
-  { href: "/hadith", icon: ScrollText, label: "Hadith", exact: false },
-  { href: "/dua", icon: Sparkles, label: "Dua", exact: false },
-  { href: "/dhikr", icon: RefreshCw, label: "Dhikr", exact: false },
-];
+import { navItems, isNavActive } from "@/src/shared/constants/nav";
 
 export function Sidebar() {
   const pathname = usePathname();
-
-  const isActive = (href: string, exact: boolean) => {
-    if (exact) return pathname === href;
-    return pathname === href || pathname.startsWith(href + "/");
-  };
 
   return (
     <aside className="hidden md:flex w-64 bg-white border-r border-[#E9E3D8] flex-col h-full z-10 shrink-0 overflow-y-auto scrollbar-hide">
@@ -34,7 +21,7 @@ export function Sidebar() {
         
         <nav className="space-y-1" aria-label="Main Navigation">
           {navItems.map(({ href, icon: Icon, label, exact }) => {
-            const active = isActive(href, exact);
+            const active = isNavActive(pathname, href, exact);
             return (
               <Link
                 key={href}

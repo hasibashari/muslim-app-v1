@@ -6,6 +6,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, BookmarkCheck } from "l
 import { useSession } from "@/src/features/auth/hooks";
 import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
 import { db, isConfigured } from "@/src/lib/firebase";
+import { getPageNumbers } from "@/src/shared/utils/pagination";
+import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
 
 interface Hadith {
   id: number;
@@ -30,24 +32,6 @@ interface HadithDetailPageClientProps {
   endItem: number;
 }
 
-const getPageNumbers = (current: number, total: number) => {
-  const pages: (number | string)[] = [];
-  const delta = 2;
-
-  for (let i = 1; i <= total; i++) {
-    if (
-      i === 1 ||
-      i === total ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      pages.push(i);
-    } else if (pages[pages.length - 1] !== '...') {
-      pages.push('...');
-    }
-  }
-  return pages;
-};
-
 export function HadithDetailPageClient({
   hadiths,
   collection: hadithCollection,
@@ -58,24 +42,19 @@ export function HadithDetailPageClient({
 }: HadithDetailPageClientProps) {
   const { data: session, status } = useSession();
   const collectionId = hadithCollection.id;
-  const [bookmarkedHadiths, setBookmarkedHadiths] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== "undefined") {
-      const localData = localStorage.getItem("noor_bookmarks");
-      if (localData) {
-        try {
-          const parsed = JSON.parse(localData) as any[];
-          const bookmarked: Record<string, boolean> = {};
-          parsed.forEach((b) => {
-            if (b.item_type === "hadith" && b.item_id.startsWith(`${collectionId}:`)) {
-              bookmarked[b.item_id] = true;
-            }
-          });
-          return bookmarked;
-        } catch (e) { }
-      }
+  const [bookmarkedHadiths, setBookmarkedHadiths] = useState<Record<string, boolean>>(
+    () => {
+      if (typeof window === "undefined") return {};
+      const allBookmarks = readLocalBookmarks();
+      const bookmarked: Record<string, boolean> = {};
+      allBookmarks.forEach((b) => {
+        if (b.item_type === "hadith" && b.item_id.startsWith(`${collectionId}:`)) {
+          bookmarked[b.item_id] = true;
+        }
+      });
+      return bookmarked;
     }
-    return {};
-  });
+  );
 
   // 1. Fetch bookmarked Hadiths for this collection in Firestore
   useEffect(() => {
@@ -124,19 +103,22 @@ export function HadithDetailPageClient({
         }
       } catch (err) {
         console.error("Failed to toggle hadith bookmark in Firestore:", err);
+        // Revert optimistic update
+        setBookmarkedHadiths((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     } else {
       try {
-        const localData = localStorage.getItem("noor_bookmarks");
-        let bookmarks = localData ? JSON.parse(localData) : [];
+        let bookmarks = readLocalBookmarks();
         if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b: any) => !(b.item_type === "hadith" && b.item_id === itemId));
+          bookmarks = bookmarks.filter((b) => !(b.item_type === "hadith" && b.item_id === itemId));
         } else {
           bookmarks.push(bookmarkData);
         }
-        localStorage.setItem("noor_bookmarks", JSON.stringify(bookmarks));
+        writeLocalBookmarks(bookmarks);
       } catch (e) {
         console.error("Failed to toggle local hadith bookmark:", e);
+        // Revert optimistic update
+        setBookmarkedHadiths((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
       }
     }
   };
@@ -189,7 +171,7 @@ export function HadithDetailPageClient({
               </div>
 
               <div className="flex flex-col gap-8">
-                <p className="text-2xl md:text-3xl font-serif text-right leading-loose text-[#1A3A2A]" dir="rtl">
+                <p className="text-2xl md:text-3xl font-serif text-right leading-loose text-[#2D5A43]" dir="rtl">
                   {hadith.text_arab}
                 </p>
                 <div className="h-px w-full bg-slate-100"></div>
