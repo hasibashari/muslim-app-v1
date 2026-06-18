@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { 
   signInWithPopup, 
+  signInWithRedirect,
   GoogleAuthProvider, 
   signOut as firebaseSignOut, 
   onAuthStateChanged,
@@ -126,6 +127,14 @@ export async function signIn(providerName: string) {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error("Sign in failed:", error);
+      if (error && typeof error === "object" && "code" in error && error.code === "auth/popup-blocked") {
+        try {
+          console.log("Popup blocked. Falling back to signInWithRedirect...");
+          await signInWithRedirect(auth, provider);
+        } catch (redirectError) {
+          console.error("Sign in with redirect failed:", redirectError);
+        }
+      }
     }
   }
 }
