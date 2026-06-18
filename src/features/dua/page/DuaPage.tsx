@@ -114,19 +114,19 @@ export default async function DuaPage({ searchParams }: PageProps) {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-8 py-4 border-t border-[#E9E3D8]/50">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 mt-8 py-4 border-t border-[#E9E3D8]/50">
           {/* Previous Button */}
           {page > 1 ? (
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page - 1}`}
-              className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm shrink-0"
               title="Previous Page"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={16} />
             </Link>
           ) : (
-            <span className="w-10 h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
-              <ChevronLeft size={18} />
+            <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none shrink-0">
+              <ChevronLeft size={16} />
             </span>
           )}
 
@@ -134,17 +134,20 @@ export default async function DuaPage({ searchParams }: PageProps) {
           {getPageNumbers(page, totalPages).map((p, idx) => {
             if (p === '...') {
               return (
-                <span key={`ellips-${idx}`} className="w-10 h-10 flex items-center justify-center text-slate-400 text-sm font-bold">
+                <span key={`ellips-${idx}`} className="w-8 h-8 sm:w-10 sm:h-10 hidden sm:flex items-center justify-center text-slate-400 text-xs sm:text-sm font-bold shrink-0">
                   ...
                 </span>
               );
             }
             const isCurrent = p === page;
+            const isNear = p === page || p === page - 1 || p === page + 1;
             return (
               <Link
                 key={`page-${p}`}
                 href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${p}`}
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm ${isCurrent
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full items-center justify-center text-xs sm:text-sm font-bold transition-all shadow-sm shrink-0 ${
+                  isNear ? 'flex' : 'hidden sm:flex'
+                } ${isCurrent
                     ? 'bg-[#2D5A43] text-white border border-[#2D5A43]'
                     : 'bg-white text-slate-600 border border-[#E9E3D8] hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30'
                   }`}
@@ -159,14 +162,14 @@ export default async function DuaPage({ searchParams }: PageProps) {
           {page < totalPages ? (
             <Link
               href={`/dua?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}&page=${page + 1}`}
-              className="w-10 h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm"
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white text-slate-600 border border-[#E9E3D8] flex items-center justify-center hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30 transition-colors shadow-sm shrink-0"
               title="Next Page"
             >
-              <ChevronRight size={18} />
+              <ChevronRight size={16} />
             </Link>
           ) : (
-            <span className="w-10 h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none">
-              <ChevronRight size={18} />
+            <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-50 text-slate-300 border border-slate-100 flex items-center justify-center cursor-not-allowed shadow-none shrink-0">
+              <ChevronRight size={16} />
             </span>
           )}
         </div>
