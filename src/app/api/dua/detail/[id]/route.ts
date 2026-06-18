@@ -18,7 +18,11 @@ export async function GET(
       return NextResponse.json({ error: 'Supplication not found' }, { status: 404 });
     }
     
-    return NextResponse.json({ dua });
+    return NextResponse.json({ dua }, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch supplication' }, { status: 500 });
   }

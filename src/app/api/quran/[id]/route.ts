@@ -19,7 +19,11 @@ export async function GET(
     }
     
     const verses = quranService.getVersesBySurahId(surahId);
-    return NextResponse.json({ surah, verses });
+    return NextResponse.json({ surah, verses }, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch surah details' }, { status: 500 });
   }

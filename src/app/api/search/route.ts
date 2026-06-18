@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   }
 
   const results: SearchResult[] = [];
-  const searchTerm = `%${query}%`;
+  const searchTerm = `%${query.toLowerCase()}%`;
   const limit = 5;
 
   try {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       .prepare(
         `SELECT id, name_simple, name_arabic, translated_name, revelation_place, verses_count
          FROM surahs
-         WHERE name_simple LIKE ? OR translated_name LIKE ? OR name_arabic LIKE ?
+         WHERE LOWER(name_simple) LIKE ? OR LOWER(translated_name) LIKE ? OR LOWER(name_arabic) LIKE ?
          LIMIT ?`
       )
       .all(searchTerm, searchTerm, searchTerm, limit) as {
@@ -51,12 +51,42 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Search Quran Verses (by translation only, grouped by surah to get diverse matches)
+    const verseRows = db
+      .prepare(
+        `SELECT v.id, v.surah_id, v.verse_number, v.text_arabic, v.text_translation, s.name_simple as surah_name
+         FROM verses v
+         JOIN surahs s ON v.surah_id = s.id
+         WHERE LOWER(v.text_translation) LIKE ?
+         GROUP BY v.surah_id
+         LIMIT ?`
+      )
+      .all(searchTerm, limit) as {
+      id: number;
+      surah_id: number;
+      verse_number: number;
+      text_arabic: string;
+      text_translation: string;
+      surah_name: string;
+    }[];
+
+    for (const v of verseRows) {
+      const snippet = v.text_translation.length > 80 ? v.text_translation.slice(0, 80) + '...' : v.text_translation;
+      results.push({
+        type: 'surah',
+        id: `verse_${v.surah_id}_${v.verse_number}`,
+        title: `${v.surah_name} · Ayat ${v.verse_number}`,
+        subtitle: snippet,
+        href: `/quran/${v.surah_id}#verse-${v.verse_number}`,
+      });
+    }
+
     // Search Duas (by title or translation)
     const duaRows = db
       .prepare(
         `SELECT id, title, text_translation, category
          FROM duas
-         WHERE title LIKE ? OR text_translation LIKE ? OR latin LIKE ?
+         WHERE LOWER(title) LIKE ? OR LOWER(text_translation) LIKE ? OR LOWER(latin) LIKE ?
          LIMIT ?`
       )
       .all(searchTerm, searchTerm, searchTerm, limit) as {
@@ -81,7 +111,7 @@ export async function GET(request: NextRequest) {
       .prepare(
         `SELECT id, title, category, text_translation
          FROM dhikrs
-         WHERE title LIKE ? OR text_translation LIKE ? OR latin LIKE ?
+         WHERE LOWER(title) LIKE ? OR LOWER(text_translation) LIKE ? OR LOWER(latin) LIKE ?
          LIMIT ?`
       )
       .all(searchTerm, searchTerm, searchTerm, limit) as {
@@ -108,7 +138,7 @@ export async function GET(request: NextRequest) {
                 (SELECT COUNT(*) FROM hadiths h2 WHERE h2.collection_id = h.collection_id AND h2.id < h.id) as rank
          FROM hadiths h
          JOIN hadith_collections c ON h.collection_id = c.id
-         WHERE h.text_en LIKE ? OR h.text_arab LIKE ?
+         WHERE LOWER(h.text_en) LIKE ? OR LOWER(h.text_arab) LIKE ?
          LIMIT ?`
       )
       .all(searchTerm, searchTerm, limit) as {

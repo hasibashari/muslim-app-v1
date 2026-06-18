@@ -3,10 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bookmark, BookmarkCheck, Info } from "lucide-react";
-import { useSession } from "@/src/features/auth/hooks";
-import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
-import { db, isConfigured } from "@/src/lib/firebase";
-import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
+import { useBookmarkList } from "@/src/shared/hooks/useBookmark";
 
 interface Dhikr {
   id: number;
@@ -26,8 +23,11 @@ interface DhikrDetailPageClientProps {
 }
 
 export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClientProps) {
-  const { data: session, status } = useSession();
-  const [bookmarkedDhikrs, setBookmarkedDhikrs] = useState<Record<string, boolean>>({});
+  const { bookmarkedMap: bookmarkedDhikrs, toggleBookmark } = useBookmarkList({
+    itemType: "dhikr",
+    docPrefix: "dhikr",
+    category,
+  });
   const [expandedBenefits, setExpandedBenefits] = useState<Record<number, boolean>>({});
 
   const toggleBenefit = (id: number) => {
@@ -37,34 +37,6 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
     }));
   };
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
-      getDocs(bookmarksRef).then((snap) => {
-        const bookmarked: Record<string, boolean> = {};
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (data.item_type === "dhikr" && data.category === category) {
-            bookmarked[data.item_id] = true;
-          }
-        });
-        setBookmarkedDhikrs(bookmarked);
-      }).catch((err) => console.error("Error fetching dhikr bookmarks:", err));
-    } else if (status !== "loading") {
-      const allBookmarks = readLocalBookmarks();
-      const bookmarked: Record<string, boolean> = {};
-      allBookmarks.forEach((b) => {
-        if (b.item_type === "dhikr" && b.category === category) {
-          bookmarked[b.item_id] = true;
-        }
-      });
-      const timer = setTimeout(() => {
-        setBookmarkedDhikrs(bookmarked);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [status, session?.user?.id, category]);
-
   // Track last read Dhikr Category
   useEffect(() => {
     if (category) {
@@ -72,55 +44,14 @@ export function DhikrDetailPageClient({ dhikrs, category }: DhikrDetailPageClien
     }
   }, [category]);
 
-  // 2. Toggle Dhikr bookmark
+  // Toggle Dhikr bookmark
   const handleToggleBookmark = async (dhikr: Dhikr) => {
-    const itemId = String(dhikr.id);
-    const isCurrentlyBookmarked = !!bookmarkedDhikrs[itemId];
-
-    // Optimistic Update
-    setBookmarkedDhikrs((prev) => ({
-      ...prev,
-      [itemId]: !isCurrentlyBookmarked,
-    }));
-
-    const bookmarkData = {
-      item_type: "dhikr" as const,
-      item_id: itemId,
+    await toggleBookmark({
+      itemId: String(dhikr.id),
       title: dhikr.title,
       subtitle: `Dhikr • ${category}`,
       category: category,
-      created_at: new Date().toISOString(),
-    };
-
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      try {
-        const docId = `dhikr_${itemId}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-        if (isCurrentlyBookmarked) {
-          await deleteDoc(docRef);
-        } else {
-          await setDoc(docRef, bookmarkData);
-        }
-      } catch (err) {
-        console.error("Failed to toggle dhikr bookmark in Firestore:", err);
-        // Revert optimistic update
-        setBookmarkedDhikrs((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    } else {
-      try {
-        let bookmarks = readLocalBookmarks();
-        if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b) => !(b.item_type === "dhikr" && b.item_id === itemId));
-        } else {
-          bookmarks.push(bookmarkData);
-        }
-        writeLocalBookmarks(bookmarks);
-      } catch (e) {
-        console.error("Failed to toggle local dhikr bookmark:", e);
-        // Revert optimistic update
-        setBookmarkedDhikrs((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    }
+    });
   };
 
   return (

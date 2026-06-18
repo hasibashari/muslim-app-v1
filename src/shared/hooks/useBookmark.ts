@@ -15,7 +15,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from "firebase/firestore";
 import { db, isConfigured } from "@/src/lib/firebase";
 import { useSession } from "@/src/features/auth/hooks";
 
@@ -142,38 +142,126 @@ export function useBookmark(options: UseBookmarkOptions) {
   return { isBookmarked, toggleBookmark };
 }
 
-/**
- * Hook untuk mengelola state bookmark BANYAK item sekaligus (e.g., semua ayat di satu surah).
- * Berguna untuk VersesList dan HadithDetailPageClient yang render banyak item.
- *
- * @param itemType    - Tipe item ("quran" | "hadith" | "dua" | "dhikr")
- * @param docPrefix   - Prefix dokumen Firestore
- * @param itemPrefix  - Prefix item_id untuk filter (e.g. "2:" untuk Surah Al-Baqarah)
- * @param buildItemId - Fungsi untuk membentuk item_id dari verse/hadith number
- */
-export function useBookmarkList(params: {
+interface UseBookmarkListOptions {
   itemType: BookmarkData["item_type"];
   docPrefix: string;
-  /** Filter hanya bookmark yang item_id-nya dimulai dengan string ini */
-  itemIdPrefix: string;
-  /** Firebase collection path — array of path segments */
-}) {
-  const { itemType, docPrefix, itemIdPrefix } = params;
+  itemIdPrefix?: string;
+  category?: string;
+}
+
+/**
+ * Hook untuk mengelola state bookmark BANYAK item sekaligus (e.g., semua ayat di satu surah, atau hadits).
+ * Mendukung Firestore (auth) dan localStorage (guest/offline) secara transparan.
+ */
+export function useBookmarkList(options: UseBookmarkListOptions) {
+  const { itemType, docPrefix, itemIdPrefix, category } = options;
   const { data: session, status } = useSession();
+  const [bookmarkedMap, setBookmarkedMap] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    const allBookmarks = readLocalBookmarks();
+    const initialMap: Record<string, boolean> = {};
+    allBookmarks.forEach((b) => {
+      if (b.item_type === itemType) {
+        if (itemIdPrefix && !b.item_id.startsWith(itemIdPrefix)) return;
+        if (category && b.category !== category) return;
+        initialMap[b.item_id] = true;
+      }
+    });
+    return initialMap;
+  });
 
-  const [bookmarkedMap, setBookmarkedMap] = useState<Record<string, boolean>>(
-    () => {
-      if (typeof window === "undefined") return {};
-      const bookmarks = readLocalBookmarks();
-      const map: Record<string, boolean> = {};
-      bookmarks.forEach((b) => {
-        if (b.item_type === itemType && b.item_id.startsWith(itemIdPrefix)) {
-          map[b.item_id] = true;
+  // 1. Sync from localStorage if parameters change
+  useEffect(() => {
+    const allBookmarks = readLocalBookmarks();
+    const initialMap: Record<string, boolean> = {};
+    allBookmarks.forEach((b) => {
+      if (b.item_type === itemType) {
+        if (itemIdPrefix && !b.item_id.startsWith(itemIdPrefix)) return;
+        if (category && b.category !== category) return;
+        initialMap[b.item_id] = true;
+      }
+    });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setBookmarkedMap(initialMap);
+  }, [itemType, itemIdPrefix, category]);
+
+  // 2. Load from Firestore if authenticated
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user?.id || !isConfigured) return;
+
+    const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
+    getDocs(bookmarksRef)
+      .then((snap) => {
+        const fbMap: Record<string, boolean> = {};
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (data.item_type === itemType) {
+            if (itemIdPrefix && !data.item_id.startsWith(itemIdPrefix)) return;
+            if (category && data.category !== category) return;
+            fbMap[data.item_id] = true;
+          }
+        });
+        setBookmarkedMap(fbMap);
+      })
+      .catch((err) => console.error(`Error fetching ${itemType} bookmarks:`, err));
+  }, [status, session?.user?.id, itemType, itemIdPrefix, category]);
+
+  /** Toggle bookmark for a specific item in the list */
+  const toggleBookmark = async (params: {
+    itemId: string;
+    title: string;
+    subtitle: string;
+    category?: string;
+  }) => {
+    const { itemId, title, subtitle, category: itemCategory } = params;
+    const isCurrentlyBookmarked = !!bookmarkedMap[itemId];
+
+    // Optimistic Update
+    setBookmarkedMap((prev) => ({
+      ...prev,
+      [itemId]: !isCurrentlyBookmarked,
+    }));
+
+    const bookmarkData: BookmarkData = {
+      item_type: itemType,
+      item_id: itemId,
+      title,
+      subtitle,
+      category: itemCategory,
+      created_at: new Date().toISOString(),
+    };
+
+    if (status === "authenticated" && session?.user?.id && isConfigured) {
+      try {
+        const docId = `${docPrefix}_${itemId.replace(/:/g, "_")}`;
+        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
+        
+        if (isCurrentlyBookmarked) {
+          await deleteDoc(docRef);
+        } else {
+          await setDoc(docRef, bookmarkData);
         }
-      });
-      return map;
+      } catch (err) {
+        console.error(`Failed to toggle ${itemType} bookmark in Firestore:`, err);
+        // Revert optimistic update
+        setBookmarkedMap((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
+      }
+    } else {
+      try {
+        let bookmarks = readLocalBookmarks();
+        if (isCurrentlyBookmarked) {
+          bookmarks = bookmarks.filter((b) => !(b.item_type === itemType && b.item_id === itemId));
+        } else {
+          bookmarks.push(bookmarkData);
+        }
+        writeLocalBookmarks(bookmarks);
+      } catch (e) {
+        console.error(`Failed to toggle local ${itemType} bookmark:`, e);
+        // Revert optimistic update
+        setBookmarkedMap((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
+      }
     }
-  );
+  };
 
-  return { bookmarkedMap, setBookmarkedMap, status, session };
+  return { bookmarkedMap, toggleBookmark, status, session };
 }

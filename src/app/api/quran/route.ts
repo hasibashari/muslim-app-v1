@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q') || searchParams.get('query') || '';
     
     const surahs = quranService.searchSurahs(query);
-    return NextResponse.json({ surahs });
+    return NextResponse.json({ surahs }, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch surahs' }, { status: 500 });
   }

@@ -7,7 +7,8 @@ import { calculatePrayerTimes } from "@/src/lib/prayerTimes";
 // Helper for manual tabular Hijri calculation (fallback)
 function getFallbackHijri(date: Date) {
   const time = date.getTime();
-  const jd = time / 86400000 + 2440587.5;
+  // Add +1 day offset to align with local moon sighting / Kemenag standard
+  const jd = time / 86400000 + 2440587.5 + 1;
 
   const l = Math.floor(jd) - 1948440 + 10632;
   const n = Math.floor((l - 1) / 10631);
@@ -97,9 +98,22 @@ export function PrayerAndCalendarWidgets() {
       // Time string format "HH:MM"
       const hh = String(now.getHours()).padStart(2, "0");
       const mm = String(now.getMinutes()).padStart(2, "0");
-      setCurrentTime(`${hh}:${mm}`);
+      const timeStr = `${hh}:${mm}`;
+      setCurrentTime(timeStr);
 
-      // Calculate Hijri Date with native Intl API or fallback
+      // Adjust date to the next Hijri day if it is after Maghrib (sunset)
+      const displayDate = new Date(now);
+      try {
+        const timezoneOffset = -now.getTimezoneOffset() / 60;
+        const pt = calculatePrayerTimes(now, coords.latitude, coords.longitude, timezoneOffset);
+        if (pt && pt.Maghrib && timeStr >= pt.Maghrib) {
+          displayDate.setDate(displayDate.getDate() + 1);
+        }
+      } catch (e) {
+        console.error("Failed to check Maghrib offset for Hijri date:", e);
+      }
+
+      // Calculate Hijri Date with native Intl API or fallback using displayDate
       try {
         const formatterDate = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
           day: "numeric",
@@ -109,8 +123,8 @@ export function PrayerAndCalendarWidgets() {
           year: "numeric",
         });
 
-        const dateStr = formatterDate.format(now);
-        const yearStr = formatterYear.format(now);
+        const dateStr = formatterDate.format(displayDate);
+        const yearStr = formatterYear.format(displayDate);
 
         // Validation: Safari/some environments might incorrectly format Hijri using Gregorian month names (like January) or BC/AD
         const gregorianMonths = [
@@ -132,7 +146,7 @@ export function PrayerAndCalendarWidgets() {
         setHijriYear(yearStr);
       } catch (e) {
         // Fallback: manual calculation
-        const hijri = getFallbackHijri(now);
+        const hijri = getFallbackHijri(displayDate);
         setHijriDate(`${hijri.day} ${HIJRI_MONTHS[hijri.month - 1]}`);
         setHijriYear(`${hijri.year} H`);
       }
@@ -141,7 +155,7 @@ export function PrayerAndCalendarWidgets() {
     updateTimeAndDate();
     const interval = setInterval(updateTimeAndDate, 30000); // update every 30s
     return () => clearInterval(interval);
-  }, []);
+  }, [coords]);
 
   // 3. Calculate prayer times for the current date & coordinates
   const now = new Date();

@@ -4,10 +4,7 @@ import { useState, useEffect } from "react";
 import { Verse } from "../types";
 import { Info, X, Bookmark, BookmarkCheck } from "lucide-react";
 import { useSettings } from "@/src/features/settings/hooks";
-import { useSession } from "@/src/features/auth/hooks";
-import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
-import { db, isConfigured } from "@/src/lib/firebase";
-import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
+import { useBookmarkList } from "@/src/shared/hooks/useBookmark";
 
 interface VersesListProps {
   verses: Verse[];
@@ -17,88 +14,22 @@ interface VersesListProps {
 
 export function VersesList({ verses, surahId, surahName }: VersesListProps) {
   const { settings } = useSettings();
-  const { data: session, status } = useSession();
+  const { bookmarkedMap: bookmarkedVerses, toggleBookmark } = useBookmarkList({
+    itemType: "quran",
+    docPrefix: "quran",
+    itemIdPrefix: `${surahId}:`,
+  });
 
   const [expandedFootnotes, setExpandedFootnotes] = useState<Record<number, boolean>>({});
-  const [bookmarkedVerses, setBookmarkedVerses] = useState<Record<string, boolean>>(
-    () => {
-      if (typeof window === "undefined") return {};
-      const allBookmarks = readLocalBookmarks();
-      const bookmarked: Record<string, boolean> = {};
-      allBookmarks.forEach((b) => {
-        if (b.item_type === "quran" && b.item_id.startsWith(`${surahId}:`)) {
-          bookmarked[b.item_id] = true;
-        }
-      });
-      return bookmarked;
-    }
-  );
-
-  // 1. Fetch bookmarked verses for this Surah in Firestore
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
-      getDocs(bookmarksRef).then((snap) => {
-        const bookmarked: Record<string, boolean> = {};
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (data.item_type === "quran" && data.item_id.startsWith(`${surahId}:`)) {
-            bookmarked[data.item_id] = true;
-          }
-        });
-        setBookmarkedVerses(bookmarked);
-      }).catch((err) => console.error("Error fetching verse bookmarks:", err));
-    }
-  }, [status, session?.user?.id, surahId]);
 
   // 2. Toggle bookmark for a verse
   const handleToggleBookmark = async (verseNumber: number) => {
     const itemId = `${surahId}:${verseNumber}`;
-    const isCurrentlyBookmarked = !!bookmarkedVerses[itemId];
-
-    // Optimistic Update
-    setBookmarkedVerses((prev) => ({
-      ...prev,
-      [itemId]: !isCurrentlyBookmarked,
-    }));
-
-    const bookmarkData = {
-      item_type: "quran" as const,
-      item_id: itemId,
+    await toggleBookmark({
+      itemId,
       title: `${surahName} • Ayat ${verseNumber}`,
       subtitle: `Surah ${surahName} • Ayat ${verseNumber}`,
-      created_at: new Date().toISOString(),
-    };
-
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      try {
-        const docId = `quran_${itemId}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-        if (isCurrentlyBookmarked) {
-          await deleteDoc(docRef);
-        } else {
-          await setDoc(docRef, bookmarkData);
-        }
-      } catch (err) {
-        console.error("Failed to update verse bookmark in Firestore:", err);
-        // Revert optimistic update
-        setBookmarkedVerses((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    } else {
-      try {
-        let bookmarks = readLocalBookmarks();
-        if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b) => !(b.item_type === "quran" && b.item_id === itemId));
-        } else {
-          bookmarks.push(bookmarkData);
-        }
-        writeLocalBookmarks(bookmarks);
-      } catch (e) {
-        console.error("Failed to update local bookmarks:", e);
-        // Revert optimistic update
-        setBookmarkedVerses((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    }
+    });
   };
 
   const toggleFootnote = (verseId: number) => {

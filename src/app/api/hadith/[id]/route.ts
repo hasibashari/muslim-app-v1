@@ -37,6 +37,10 @@ export async function GET(
         total,
         totalPages
       }
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=600'
+      }
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch hadiths' }, { status: 500 });

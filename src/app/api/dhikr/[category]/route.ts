@@ -21,7 +21,11 @@ export async function GET(
     }
     
     const dhikrs = dhikrService.getDhikrsByCategory(matchedCategory);
-    return NextResponse.json({ category: matchedCategory, dhikrs });
+    return NextResponse.json({ category: matchedCategory, dhikrs }, {
+      headers: {
+        'Cache-Control': 'public, max-age=86400, stale-while-revalidate=600'
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch dhikrs' }, { status: 500 });
   }

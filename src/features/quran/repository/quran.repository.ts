@@ -12,6 +12,6 @@ export const quranRepository = {
     return db.prepare('SELECT * FROM verses WHERE surah_id = ? ORDER BY verse_number ASC').all(surahId) as Verse[];
   },
   searchSurahs: (query: string): Surah[] => {
-    return db.prepare('SELECT * FROM surahs WHERE name_simple LIKE ? OR translated_name LIKE ?').all(`%${query}%`, `%${query}%`) as Surah[];
+    return db.prepare('SELECT * FROM surahs WHERE LOWER(name_simple) LIKE ? OR LOWER(translated_name) LIKE ?').all(`%${query.toLowerCase()}%`, `%${query.toLowerCase()}%`) as Surah[];
   }
 };

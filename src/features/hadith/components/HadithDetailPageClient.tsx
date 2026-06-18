@@ -3,11 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronLeft, ChevronRight, Bookmark, BookmarkCheck } from "lucide-react";
-import { useSession } from "@/src/features/auth/hooks";
-import { collection, doc, getDocs, setDoc, deleteDoc } from "firebase/firestore";
-import { db, isConfigured } from "@/src/lib/firebase";
 import { getPageNumbers } from "@/src/shared/utils/pagination";
-import { readLocalBookmarks, writeLocalBookmarks } from "@/src/shared/hooks/useBookmark";
+import { useBookmarkList } from "@/src/shared/hooks/useBookmark";
 
 interface Hadith {
   id: number;
@@ -40,38 +37,12 @@ export function HadithDetailPageClient({
   startItem,
   endItem,
 }: HadithDetailPageClientProps) {
-  const { data: session, status } = useSession();
   const collectionId = hadithCollection.id;
-  const [bookmarkedHadiths, setBookmarkedHadiths] = useState<Record<string, boolean>>(
-    () => {
-      if (typeof window === "undefined") return {};
-      const allBookmarks = readLocalBookmarks();
-      const bookmarked: Record<string, boolean> = {};
-      allBookmarks.forEach((b) => {
-        if (b.item_type === "hadith" && b.item_id.startsWith(`${collectionId}:`)) {
-          bookmarked[b.item_id] = true;
-        }
-      });
-      return bookmarked;
-    }
-  );
-
-  // 1. Fetch bookmarked Hadiths for this collection in Firestore
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      const bookmarksRef = collection(db, "users", session.user.id, "bookmarks");
-      getDocs(bookmarksRef).then((snap) => {
-        const bookmarked: Record<string, boolean> = {};
-        snap.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (data.item_type === "hadith" && data.item_id.startsWith(`${collectionId}:`)) {
-            bookmarked[data.item_id] = true;
-          }
-        });
-        setBookmarkedHadiths(bookmarked);
-      }).catch((err) => console.error("Error fetching hadith bookmarks:", err));
-    }
-  }, [status, session?.user?.id, collectionId]);
+  const { bookmarkedMap: bookmarkedHadiths, toggleBookmark } = useBookmarkList({
+    itemType: "hadith",
+    docPrefix: "hadith",
+    itemIdPrefix: `${collectionId}:`,
+  });
 
   // Scroll to hash element if present (e.g. #hadith-300)
   useEffect(() => {
@@ -90,54 +61,14 @@ export function HadithDetailPageClient({
     }
   }, [hadiths]);
 
-  // 2. Toggle Hadith bookmark
+  // Toggle Hadith bookmark
   const handleToggleBookmark = async (hadith: Hadith) => {
     const itemId = `${collectionId}:${page}:${hadith.hadith_number}`;
-    const isCurrentlyBookmarked = !!bookmarkedHadiths[itemId];
-
-    // Optimistic Update
-    setBookmarkedHadiths((prev) => ({
-      ...prev,
-      [itemId]: !isCurrentlyBookmarked,
-    }));
-
-    const bookmarkData = {
-      item_type: "hadith" as const,
-      item_id: itemId,
+    await toggleBookmark({
+      itemId,
       title: `${hadithCollection.name} • Hadith #${hadith.hadith_number}`,
       subtitle: hadith.text_en.length > 60 ? `${hadith.text_en.substring(0, 60)}...` : hadith.text_en,
-      created_at: new Date().toISOString(),
-    };
-
-    if (status === "authenticated" && session?.user?.id && isConfigured) {
-      try {
-        const docId = `hadith_${itemId.replace(/:/g, "_")}`;
-        const docRef = doc(db, "users", session.user.id, "bookmarks", docId);
-        if (isCurrentlyBookmarked) {
-          await deleteDoc(docRef);
-        } else {
-          await setDoc(docRef, bookmarkData);
-        }
-      } catch (err) {
-        console.error("Failed to toggle hadith bookmark in Firestore:", err);
-        // Revert optimistic update
-        setBookmarkedHadiths((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    } else {
-      try {
-        let bookmarks = readLocalBookmarks();
-        if (isCurrentlyBookmarked) {
-          bookmarks = bookmarks.filter((b) => !(b.item_type === "hadith" && b.item_id === itemId));
-        } else {
-          bookmarks.push(bookmarkData);
-        }
-        writeLocalBookmarks(bookmarks);
-      } catch (e) {
-        console.error("Failed to toggle local hadith bookmark:", e);
-        // Revert optimistic update
-        setBookmarkedHadiths((prev) => ({ ...prev, [itemId]: isCurrentlyBookmarked }));
-      }
-    }
+    });
   };
 
   return (

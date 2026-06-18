@@ -28,8 +28,8 @@ export const duaRepository = {
     }
 
     if (query && query.trim()) {
-      conditions.push('(title LIKE ? OR category LIKE ? OR text_translation LIKE ?)');
-      const sqlQuery = `%${query.trim()}%`;
+      conditions.push('(LOWER(title) LIKE ? OR LOWER(category) LIKE ? OR LOWER(text_translation) LIKE ?)');
+      const sqlQuery = `%${query.trim().toLowerCase()}%`;
       params.push(sqlQuery, sqlQuery, sqlQuery);
     }
 
@@ -53,8 +53,8 @@ export const duaRepository = {
     }
 
     if (query && query.trim()) {
-      conditions.push('(title LIKE ? OR category LIKE ? OR text_translation LIKE ?)');
-      const sqlQuery = `%${query.trim()}%`;
+      conditions.push('(LOWER(title) LIKE ? OR LOWER(category) LIKE ? OR LOWER(text_translation) LIKE ?)');
+      const sqlQuery = `%${query.trim().toLowerCase()}%`;
       params.push(sqlQuery, sqlQuery, sqlQuery);
     }
 
