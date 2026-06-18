@@ -3,12 +3,23 @@
 @theme {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-serif), ui-serif, Georgia, serif;
+  --font-arabic: var(--font-arabic), serif;
+}
+
+[dir="rtl"] {
+  font-family: var(--font-serif), var(--font-arabic), serif;
+  font-feature-settings: "ss05" on, "cv62" 0;
+  text-rendering: optimizeLegibility;
 }
 
 @utility scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+
+  /* Firefox */
   &::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Amiri } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Sidebar } from "@/src/shared/components/Sidebar";
@@ -11,8 +11,13 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const amiri = Amiri({
+  subsets: ['arabic'],
+  weight: ['400', '700'],
+  variable: '--font-arabic',
+});
 const uthman = localFont({
-  src: '../../public/UthmanTN_v2-0.ttf',
+  src: '../../public/LPMQ IsepMisbah.ttf',
   variable: '--font-serif',
 });
 
@@ -74,7 +79,7 @@ export const dynamic = 'force-dynamic';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${uthman.variable}`}>
+    <html lang="id" className={`${inter.variable} ${uthman.variable} ${amiri.variable}`}>
       <head>
         {/* PWA: iOS Safari meta tags */}
         <meta name="mobile-web-app-capable" content="yes" />
