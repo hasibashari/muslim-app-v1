@@ -73,6 +73,23 @@ export function HadithDetailPageClient({
     }
   }, [status, session?.user?.id, collectionId]);
 
+  // Scroll to hash element if present (e.g. #hadith-300)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      if (hash) {
+        const id = hash.substring(1);
+        const element = document.getElementById(id);
+        if (element) {
+          const timer = setTimeout(() => {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 200);
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [hadiths]);
+
   // 2. Toggle Hadith bookmark
   const handleToggleBookmark = async (hadith: Hadith) => {
     const itemId = `${collectionId}:${page}:${hadith.hadith_number}`;
@@ -161,8 +178,8 @@ export function HadithDetailPageClient({
                 <button
                   onClick={() => handleToggleBookmark(hadith)}
                   className={`p-2 rounded-xl transition-colors cursor-pointer ${isBookmarked
-                      ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
-                      : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
+                    ? "text-[#2D5A43] bg-emerald-50 border border-emerald-100"
+                    : "text-slate-400 hover:text-[#2D5A43] hover:bg-slate-50 border border-transparent"
                     }`}
                   title={isBookmarked ? "Remove Hadith Bookmark" : "Save Hadith Bookmark"}
                 >
@@ -218,9 +235,8 @@ export function HadithDetailPageClient({
               <Link
                 key={`page-${p}`}
                 href={`/hadith/${collectionId}?page=${p}`}
-                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full items-center justify-center text-xs sm:text-sm font-bold transition-colors shadow-sm shrink-0 ${
-                  isNear ? 'flex' : 'hidden sm:flex'
-                } ${isCurrent
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full items-center justify-center text-xs sm:text-sm font-bold transition-colors shadow-sm shrink-0 ${isNear ? 'flex' : 'hidden sm:flex'
+                  } ${isCurrent
                     ? 'bg-[#2D5A43] text-white border border-[#2D5A43]'
                     : 'bg-white text-slate-600 border border-[#E9E3D8] hover:bg-[#FBF9F4] hover:text-[#2D5A43] hover:border-[#2D5A43]/30'
                   }`}

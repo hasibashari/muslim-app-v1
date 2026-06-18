@@ -104,7 +104,8 @@ export async function GET(request: NextRequest) {
     // Search Hadiths (by text)
     const hadithRows = db
       .prepare(
-        `SELECT h.id, h.hadith_number, h.text_en, h.collection_id, c.name as collection_name
+        `SELECT h.id, h.hadith_number, h.text_en, h.collection_id, c.name as collection_name,
+                (SELECT COUNT(*) FROM hadiths h2 WHERE h2.collection_id = h.collection_id AND h2.id < h.id) as rank
          FROM hadiths h
          JOIN hadith_collections c ON h.collection_id = c.id
          WHERE h.text_en LIKE ? OR h.text_arab LIKE ?
@@ -116,16 +117,19 @@ export async function GET(request: NextRequest) {
       text_en: string;
       collection_id: string;
       collection_name: string;
+      rank: number;
     }[];
 
     for (const h of hadithRows) {
       const snippet = h.text_en.length > 80 ? h.text_en.slice(0, 80) + '...' : h.text_en;
+      const rank = h.rank + 1; // 1-indexed position
+      const page = Math.ceil(rank / 10); // 10 hadiths per page
       results.push({
         type: 'hadith',
         id: String(h.id),
         title: `Hadith #${h.hadith_number}`,
         subtitle: `${h.collection_name} · ${snippet}`,
-        href: `/hadith/${h.collection_id}`,
+        href: `/hadith/${h.collection_id}?page=${page}#hadith-${h.hadith_number}`,
       });
     }
 

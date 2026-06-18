@@ -88,7 +88,7 @@ export default async function DuaPage({ searchParams }: PageProps) {
       <div className="flex flex-col gap-4">
         {duas.map((dua) => (
           <Link
-            href={`/dua/detail/${dua.id}`}
+            href={`/dua/detail/${dua.id}?category=${encodeURIComponent(category)}&page=${page}`}
             key={dua.id}
             className="bg-white rounded-2xl border border-[#E9E3D8] p-5 flex items-center gap-4 hover:bg-[#FBF9F4] transition-colors group cursor-pointer"
           >

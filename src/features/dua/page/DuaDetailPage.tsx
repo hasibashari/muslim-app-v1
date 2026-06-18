@@ -4,10 +4,12 @@ import { DuaDetailPageClient } from "../components/DuaDetailPageClient";
 
 interface DetailProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ category?: string; page?: string }>;
 }
 
-export default async function DuaDetailPage({ params }: DetailProps) {
+export default async function DuaDetailPage({ params, searchParams }: DetailProps) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const duaId = parseInt(resolvedParams.id, 10);
   
   if (isNaN(duaId) || duaId <= 0) {
@@ -22,5 +24,16 @@ export default async function DuaDetailPage({ params }: DetailProps) {
 
   const { prev, next } = duaService.getAdjacentDuas(duaId);
 
-  return <DuaDetailPageClient dua={dua} prev={prev} next={next} />;
+  const category = resolvedSearchParams?.category || "";
+  const page = resolvedSearchParams?.page || "";
+
+  return (
+    <DuaDetailPageClient
+      dua={dua}
+      prev={prev}
+      next={next}
+      backCategory={category}
+      backPage={page}
+    />
+  );
 }

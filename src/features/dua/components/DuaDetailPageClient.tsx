@@ -16,9 +16,17 @@ interface DuaDetailPageClientProps {
   dua: Dua;
   prev: AdjacentDua | null | undefined;
   next: AdjacentDua | null | undefined;
+  backCategory?: string;
+  backPage?: string;
 }
 
-export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProps) {
+export function DuaDetailPageClient({
+  dua,
+  prev,
+  next,
+  backCategory = "",
+  backPage = "",
+}: DuaDetailPageClientProps) {
   const [isRefExpanded, setIsRefExpanded] = useState(false);
 
   const { isBookmarked, toggleBookmark } = useBookmark({
@@ -121,9 +129,13 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
     );
   };
 
+  const backUrl = backCategory 
+    ? `/dua?category=${encodeURIComponent(backCategory)}${backPage ? `&page=${backPage}` : ""}`
+    : (dua.category ? `/dua?category=${encodeURIComponent(dua.category)}` : "/dua");
+
   return (
     <div className="p-6 md:p-10 w-full max-w-4xl mx-auto flex flex-col gap-6">
-      <Link href="/dua" className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit">
+      <Link href={backUrl} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#2D5A43] transition-colors w-fit">
         <ArrowLeft size={16} />
         Back to Supplications
       </Link>
@@ -141,10 +153,10 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
           {isBookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
         </button>
 
-        <div className="flex flex-col gap-2 border-b border-[#E9E3D8]/50 pb-4 pr-10 sm:pr-12">
+        <div className="flex flex-col gap-2 border-b border-[#E9E3D8]/50 pb-4 pr-10 pr-12">
           {dua.category && (
             <Link
-              href={`/dua?category=${encodeURIComponent(dua.category)}`}
+              href={`/dua?category=${encodeURIComponent(dua.category)}${backCategory === dua.category && backPage ? `&page=${backPage}` : ""}`}
               className="text-xs font-bold text-[#2D5A43] hover:underline uppercase tracking-widest w-fit"
             >
               {dua.category}
@@ -178,7 +190,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
       <div className="flex justify-between items-center gap-3 sm:gap-4 mt-2">
         {prev ? (
           <Link
-            href={`/dua/detail/${prev.id}`}
+            href={`/dua/detail/${prev.id}?category=${encodeURIComponent(backCategory)}&page=${backPage}`}
             className="flex-1 max-w-[240px] bg-white rounded-2xl border border-[#E9E3D8] p-2.5 sm:p-3 md:p-4 flex items-center gap-1.5 sm:gap-2 md:gap-3 hover:bg-[#FBF9F4] transition-colors group shadow-sm"
           >
             <ChevronLeft size={18} className="text-[#2D5A43] group-hover:-translate-x-1 transition-transform shrink-0" />
@@ -193,7 +205,7 @@ export function DuaDetailPageClient({ dua, prev, next }: DuaDetailPageClientProp
 
         {next ? (
           <Link
-            href={`/dua/detail/${next.id}`}
+            href={`/dua/detail/${next.id}?category=${encodeURIComponent(backCategory)}&page=${backPage}`}
             className="flex-1 max-w-[240px] bg-white rounded-2xl border border-[#E9E3D8] p-2.5 sm:p-3 md:p-4 flex items-center justify-between gap-1.5 sm:gap-2 md:gap-3 hover:bg-[#FBF9F4] transition-colors group shadow-sm text-right"
           >
             <div className="flex flex-col text-right overflow-hidden ml-auto">

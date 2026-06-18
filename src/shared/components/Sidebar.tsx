@@ -23,6 +23,7 @@ export function Sidebar() {
 
   useEffect(() => {
     const day = new Date().getDate();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDailyVerse(VERSES[day % VERSES.length]);
   }, []);
 
