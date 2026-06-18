@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Search, X, BookOpen, ScrollText, Sparkles, RefreshCw, Loader2, Hash } from "lucide-react";
 import type { SearchResult } from "@/src/app/api/search/route";
 
@@ -44,11 +44,28 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const [selectedType, setSelectedType] = useState<"all" | "quran" | "hadith" | "dua" | "dhikr">("all");
 
-  // Focus input and reset search when modal opens
+  // Focus input and reset/initialize search when modal opens
   useEffect(() => {
     if (open) {
+      // Set initial search scope based on current route context
+      let initialType: "all" | "quran" | "hadith" | "dua" | "dhikr" = "all";
+      if (pathname) {
+        if (pathname.startsWith("/quran")) {
+          initialType = "quran";
+        } else if (pathname.startsWith("/hadith")) {
+          initialType = "hadith";
+        } else if (pathname.startsWith("/dua")) {
+          initialType = "dua";
+        } else if (pathname.startsWith("/dhikr")) {
+          initialType = "dhikr";
+        }
+      }
+
       const timer = setTimeout(() => {
+        setSelectedType(initialType);
         inputRef.current?.focus();
         setQuery("");
         setResults([]);
@@ -56,7 +73,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [open, pathname]);
 
   // Close on Escape key
   useEffect(() => {
@@ -68,7 +85,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   }, [onClose]);
 
   // Debounced search
-  const performSearch = useCallback(async (q: string) => {
+  const performSearch = useCallback(async (q: string, type: string) => {
     if (q.length < 2) {
       setResults([]);
       setHasSearched(false);
@@ -77,7 +94,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     setIsLoading(true);
     setHasSearched(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&_=${Date.now()}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}&_=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);
@@ -92,7 +109,13 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const handleQueryChange = (value: string) => {
     setQuery(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => performSearch(value), 300);
+    debounceRef.current = setTimeout(() => performSearch(value, selectedType), 300);
+  };
+
+  const handleTypeChange = (type: "all" | "quran" | "hadith" | "dua" | "dhikr") => {
+    setSelectedType(type);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    performSearch(query, type);
   };
 
   const handleResultClick = (href: string) => {
@@ -138,7 +161,17 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="Search Surah, Dua, Hadith, Dhikr..."
+              placeholder={
+                selectedType === "quran"
+                  ? "Cari Quran (Nama surat, terjemahan ayat)..."
+                  : selectedType === "hadith"
+                  ? "Cari Hadits..."
+                  : selectedType === "dua"
+                  ? "Cari Doa..."
+                  : selectedType === "dhikr"
+                  ? "Cari Dzikir..."
+                  : "Cari Surat, Hadits, Doa, Dzikir..."
+              }
               className="flex-1 text-sm text-slate-800 placeholder:text-slate-400 bg-transparent outline-none"
               autoComplete="off"
               spellCheck={false}
@@ -157,6 +190,33 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 <X size={16} />
               </button>
             )}
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-[#FDFCF8] border-b border-[#F0EDE6] overflow-x-auto scrollbar-none">
+            {[
+              { id: "all", label: "Semua", icon: null },
+              { id: "quran", label: "Al-Quran", icon: <BookOpen size={13} /> },
+              { id: "hadith", label: "Hadits", icon: <ScrollText size={13} /> },
+              { id: "dua", label: "Doa", icon: <Sparkles size={13} /> },
+              { id: "dhikr", label: "Dzikir", icon: <RefreshCw size={13} /> },
+            ].map((cat) => {
+              const isActive = selectedType === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleTypeChange(cat.id as any)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all duration-150 shrink-0 cursor-pointer ${
+                    isActive
+                      ? "bg-[#2D5A43] text-white border-[#2D5A43] shadow-sm shadow-[#2D5A43]/10"
+                      : "bg-[#F5F1EA] text-slate-600 border-[#E9E3D8] hover:bg-[#EDE9E0]"
+                  }`}
+                >
+                  {cat.icon}
+                  {cat.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Results Area */}
