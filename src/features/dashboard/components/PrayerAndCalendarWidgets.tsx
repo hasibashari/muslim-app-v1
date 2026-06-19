@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, Calendar } from "lucide-react";
+import { Clock, Calendar, MapPin, Navigation, X } from "lucide-react";
 import { calculatePrayerTimes } from "@/src/lib/prayerTimes";
+import { useSettings } from "@/src/features/settings/hooks";
 
 // Helper for manual tabular Hijri calculation (fallback)
 function getFallbackHijri(date: Date) {
@@ -33,15 +34,34 @@ const HIJRI_MONTHS = [
   "Ramadan", "Syawal", "Dzulqa'dah", "Dzulhijjah"
 ];
 
+const INDONESIAN_CITIES = [
+  { name: "Jakarta", latitude: -6.2088, longitude: 106.8456 },
+  { name: "Bandung", latitude: -6.9175, longitude: 107.6191 },
+  { name: "Surabaya", latitude: -7.2575, longitude: 112.7521 },
+  { name: "Yogyakarta", latitude: -7.7956, longitude: 110.3695 },
+  { name: "Medan", latitude: 3.5952, longitude: 98.6722 },
+  { name: "Makassar", latitude: -5.1476, longitude: 119.4327 },
+  { name: "Semarang", latitude: -6.9667, longitude: 110.4167 },
+  { name: "Balikpapan", latitude: -1.2654, longitude: 116.8312 },
+  { name: "Denpasar", latitude: -8.6500, longitude: 115.2167 },
+  { name: "Palembang", latitude: -2.9909, longitude: 104.7566 },
+];
+
 export function PrayerAndCalendarWidgets() {
+  const { settings } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
-  const [hijriDate, setHijriDate] = useState("Loading...");
+  const [hijriDate, setHijriDate] = useState("Memuat...");
   const [hijriYear, setHijriYear] = useState("");
 
   // Default coordinates: Jakarta
   const [coords, setCoords] = useState({ latitude: -6.2088, longitude: 106.8456 });
   const [locationName, setLocationName] = useState("Jakarta");
+
+  // Location selector modal state
+  const [showSelector, setShowSelector] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [detectionError, setDetectionError] = useState("");
 
   // Set mounted state
   useEffect(() => {
@@ -49,7 +69,7 @@ export function PrayerAndCalendarWidgets() {
     setIsMounted(true);
   }, []);
 
-  // 1. Load saved location or request if not present
+  // 1. Load saved location from LocalStorage on mount (NO automatic GPS prompt here)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCoords = localStorage.getItem("noor_user_coords");
@@ -61,31 +81,11 @@ export function PrayerAndCalendarWidgets() {
           if (parsed && typeof parsed.latitude === "number" && typeof parsed.longitude === "number") {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setCoords(parsed);
-            setLocationName(savedLocationName || "Your Location");
-            return; // Use saved coordinates, do not trigger prompt!
+            setLocationName(savedLocationName || "Lokasi Anda");
           }
         } catch (e) {
           console.error("Failed to parse saved coordinates:", e);
         }
-      }
-
-      // If no saved coordinates, request once
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const newCoords = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            };
-            setCoords(newCoords);
-            setLocationName("Your Location");
-            localStorage.setItem("noor_user_coords", JSON.stringify(newCoords));
-            localStorage.setItem("noor_location_name", "Your Location");
-          },
-          (error) => {
-            console.log("Using default location (Jakarta) due to: ", error.message);
-          }
-        );
       }
     }
   }, []);
@@ -103,6 +103,11 @@ export function PrayerAndCalendarWidgets() {
 
       // Adjust date to the next Hijri day if it is after Maghrib (sunset)
       const displayDate = new Date(now);
+
+      // Apply offset from user settings (Option B)
+      const offsetDays = settings?.hijriOffset || 0;
+      displayDate.setDate(displayDate.getDate() + offsetDays);
+
       try {
         const timezoneOffset = -now.getTimezoneOffset() / 60;
         const pt = calculatePrayerTimes(now, coords.latitude, coords.longitude, timezoneOffset);
@@ -113,49 +118,16 @@ export function PrayerAndCalendarWidgets() {
         console.error("Failed to check Maghrib offset for Hijri date:", e);
       }
 
-      // Calculate Hijri Date with native Intl API or fallback using displayDate
-      try {
-        const formatterDate = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
-          day: "numeric",
-          month: "long",
-        });
-        const formatterYear = new Intl.DateTimeFormat("id-ID-u-ca-islamic-umalqura", {
-          year: "numeric",
-        });
-
-        const dateStr = formatterDate.format(displayDate);
-        const yearStr = formatterYear.format(displayDate);
-
-        // Validation: Safari/some environments might incorrectly format Hijri using Gregorian month names (like January) or BC/AD
-        const gregorianMonths = [
-          "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december",
-          "januari", "februari", "maret", "mei", "juni", "juli", "agustus", "oktober", "desember"
-        ];
-        const dateLower = dateStr.toLowerCase();
-        const yearLower = yearStr.toLowerCase();
-
-        const hasGregorianMonth = gregorianMonths.some(m => dateLower.includes(m));
-        const hasInvalidEra = yearLower.includes("bc") || yearLower.includes("ad") || yearLower.includes("bce") || yearLower.includes("ce") || yearLower.includes("sebelum masehi");
-
-        // Force fallback if Gregorian calendar leaked (e.g. contains 2026) or era bug occurred
-        if (hasGregorianMonth || hasInvalidEra || yearLower.includes("2025") || yearLower.includes("2026") || yearLower.includes("2027")) {
-          throw new Error("Invalid Hijri format detected");
-        }
-
-        setHijriDate(dateStr);
-        setHijriYear(yearStr);
-      } catch (e) {
-        // Fallback: manual calculation
-        const hijri = getFallbackHijri(displayDate);
-        setHijriDate(`${hijri.day} ${HIJRI_MONTHS[hijri.month - 1]}`);
-        setHijriYear(`${hijri.year} H`);
-      }
+      // Always use manual calculation (Option A) for perfect consistency across all devices
+      const hijri = getFallbackHijri(displayDate);
+      setHijriDate(`${hijri.day} ${HIJRI_MONTHS[hijri.month - 1]}`);
+      setHijriYear(`${hijri.year} H`);
     };
 
     updateTimeAndDate();
     const interval = setInterval(updateTimeAndDate, 30000); // update every 30s
     return () => clearInterval(interval);
-  }, [coords]);
+  }, [coords, settings?.hijriOffset]);
 
   // 3. Calculate prayer times for the current date & coordinates
   const now = new Date();
@@ -168,11 +140,11 @@ export function PrayerAndCalendarWidgets() {
       return { name: "--", time: "--:--" };
     }
     const list = [
-      { name: "Fajr", time: times.Fajr },
-      { name: "Dhuhr", time: times.Dhuhr },
-      { name: "Asr", time: times.Asr },
+      { name: "Subuh", time: times.Fajr },
+      { name: "Dzuhur", time: times.Dhuhr },
+      { name: "Ashar", time: times.Asr },
       { name: "Maghrib", time: times.Maghrib },
-      { name: "Isha", time: times.Isha },
+      { name: "Isya", time: times.Isha },
     ];
 
     for (const p of list) {
@@ -180,41 +152,183 @@ export function PrayerAndCalendarWidgets() {
         return p;
       }
     }
-    // If after Isya, next is Fajr tomorrow
+    // If after Isya, next is Subuh tomorrow
     return { name: "Subuh", time: list[0].time };
   };
 
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setDetectionError("Geolokasi tidak didukung oleh browser Anda.");
+      return;
+    }
+
+    setIsDetecting(true);
+    setDetectionError("");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const newCoords = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        setCoords(newCoords);
+        setLocationName("Lokasi Anda");
+        localStorage.setItem("noor_user_coords", JSON.stringify(newCoords));
+        localStorage.setItem("noor_location_name", "Lokasi Anda");
+        setIsDetecting(false);
+        setShowSelector(false);
+      },
+      (error) => {
+        console.error("Gagal mendeteksi lokasi:", error);
+        setDetectionError("Gagal mendeteksi lokasi. Pastikan izin lokasi aktif.");
+        setIsDetecting(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  const handleSelectCity = (city: typeof INDONESIAN_CITIES[0]) => {
+    setCoords({ latitude: city.latitude, longitude: city.longitude });
+    setLocationName(city.name);
+    localStorage.setItem("noor_user_coords", JSON.stringify({ latitude: city.latitude, longitude: city.longitude }));
+    localStorage.setItem("noor_location_name", city.name);
+    setShowSelector(false);
+  };
+
   const nextPrayer = getNextPrayer();
+
+  // Render Skeleton when loading to prevent Layout Shift
+  if (!isMounted) {
+    return (
+      <>
+        {/* Skeleton for Prayer Widget */}
+        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[178px]">
+          <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
+          <div className="h-3.5 w-24 bg-slate-100 rounded mb-2"></div>
+          <div className="h-6 w-16 bg-slate-200 rounded mb-2"></div>
+          <div className="h-5 w-14 bg-slate-200 rounded-full mt-1"></div>
+          <div className="h-3 w-20 bg-slate-100 rounded mt-3"></div>
+        </div>
+
+        {/* Skeleton for Hijri Widget */}
+        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[178px]">
+          <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
+          <div className="h-3.5 w-12 bg-slate-100 rounded mb-2"></div>
+          <div className="h-6 w-32 bg-slate-200 rounded mb-2"></div>
+          <div className="h-3 w-16 bg-slate-100 rounded mt-1.5"></div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
       {/* Prayer Time Widget */}
       <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
-        title={`Today's prayer times for ${locationName}`}
+        title={`Jadwal sholat hari ini untuk ${locationName}`}
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Clock size={20} />
         </div>
-        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Prayer Schedule</p>
+        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Jadwal Sholat</p>
         <p className="font-bold text-[#1A3A2A] text-lg mt-0.5">{nextPrayer.name}</p>
         <p className="text-xs font-bold text-[#2D5A43] bg-[#F0F4F2] px-3 py-1 rounded-full mt-2 transition-all">
           {nextPrayer.time}
         </p>
+
+        {/* Location Switcher Trigger Button */}
+        <button
+          onClick={() => setShowSelector(true)}
+          className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-[#2D5A43] mt-3 transition-colors cursor-pointer bg-transparent border-none outline-none group"
+        >
+          <MapPin size={12} className="text-[#2D5A43] group-hover:scale-110 transition-transform" />
+          <span className="underline decoration-dotted underline-offset-2">{locationName}</span>
+        </button>
       </div>
 
       {/* Hijri Calendar Widget */}
       <div
         className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
-        title="Today's Hijri date"
+        title="Tanggal Hijriah hari ini"
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Calendar size={20} />
         </div>
-        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijri</p>
+        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijriah</p>
         <p className="font-bold text-[#1A3A2A] text-sm mt-1 truncate max-w-full px-1">{hijriDate}</p>
         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{hijriYear}</p>
       </div>
+
+      {/* Location Selector Modal Backdrop & Dialog */}
+      {showSelector && (
+        <div
+          onClick={(e) => e.target === e.currentTarget && setShowSelector(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in"
+        >
+          <div className="bg-[#FAF8F5] border border-[#E9E3D8] w-full max-w-sm rounded-2xl p-5 shadow-xl transition-all scale-100 flex flex-col">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-[#E9E3D8]">
+              <h4 className="font-bold text-[#1A3A2A] text-sm">Pilih Lokasi Jadwal Sholat</h4>
+              <button
+                onClick={() => setShowSelector(false)}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer p-0.5 rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* GPS Detection Button */}
+            <button
+              onClick={handleDetectLocation}
+              disabled={isDetecting}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#2D5A43] hover:bg-[#204231] text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 cursor-pointer mb-3 shadow-xs"
+            >
+              {isDetecting ? (
+                <>
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  Mendeteksi lokasi...
+                </>
+              ) : (
+                <>
+                  <Navigation size={14} />
+                  Gunakan GPS (Lokasi Saat Ini)
+                </>
+              )}
+            </button>
+
+            {/* Error Message */}
+            {detectionError && (
+              <p className="text-[11px] text-red-500 font-medium mb-3 text-center">
+                {detectionError}
+              </p>
+            )}
+
+            {/* Cities Title */}
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Pilih Kota Indonesia
+            </div>
+
+            {/* Cities Grid */}
+            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+              {INDONESIAN_CITIES.map((city) => (
+                <button
+                  key={city.name}
+                  onClick={() => handleSelectCity(city)}
+                  className={`py-2 px-3 text-left text-xs rounded-xl border font-semibold transition-all cursor-pointer ${
+                    locationName === city.name
+                      ? "bg-[#2D5A43]/10 border-[#2D5A43] text-[#2D5A43]"
+                      : "bg-white border-[#E9E3D8] hover:border-[#2D5A43]/30 text-slate-700 hover:bg-slate-50/50"
+                  }`}
+                >
+                  {city.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+

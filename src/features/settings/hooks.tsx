@@ -8,11 +8,13 @@ import { useSession } from "@/src/features/auth/hooks";
 export interface AppSettings {
   fontSize: "small" | "medium" | "large";
   showTranslation: boolean;
+  hijriOffset: number;
 }
 
 const defaultSettings: AppSettings = {
   fontSize: "medium",
   showTranslation: true,
+  hijriOffset: 0,
 };
 
 interface SettingsContextType {

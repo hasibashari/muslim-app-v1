@@ -65,6 +65,28 @@ export default function SettingsPage() {
               }`} />
           </button>
         </div>
+
+        {/* Hijri Calendar Adjustment Setting */}
+        <div className="space-y-2.5 pt-3 border-t border-[#E9E3D8]/35">
+          <div>
+            <label className="text-xs font-bold text-slate-700 block">Koreksi Kalender Hijriah</label>
+            <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">Sesuaikan penanggalan Hijriah (misal +/- 1 hari)</span>
+          </div>
+          <div className="grid grid-cols-5 gap-1 bg-[#F5F1EA]/60 p-1 rounded-xl">
+            {[-2, -1, 0, 1, 2].map((offset) => (
+              <button
+                key={offset}
+                onClick={() => updateSetting("hijriOffset", offset)}
+                className={`py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${settings.hijriOffset === offset
+                    ? "bg-[#2D5A43] text-white shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
+                  }`}
+              >
+                {offset === 0 ? "Normal" : offset > 0 ? `+${offset}` : `${offset}`}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
