@@ -79,6 +79,12 @@ export function getDb(): Database.Database {
   // Ensure index on duas(category) exists for optimization
   db.exec(`CREATE INDEX IF NOT EXISTS idx_duas_category ON duas(category);`);
 
+  // Ensure composite index on hadiths(collection_id, hadith_number) exists for search optimization
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_hadiths_collection_number ON hadiths(collection_id, hadith_number);`);
+
+  // Ensure index on hadiths(hadith_number) exists for global search optimization
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_hadiths_number ON hadiths(hadith_number);`);
+
   // Seed initial data if empty
   const surahCount = db.prepare('SELECT COUNT(*) as count FROM surahs').get() as { count: number };
   if (surahCount.count === 0) {

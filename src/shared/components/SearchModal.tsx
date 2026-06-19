@@ -94,7 +94,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     setIsLoading(true);
     setHasSearched(true);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}&_=${Date.now()}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=${type}`);
       if (res.ok) {
         const data = await res.json();
         setResults(data.results || []);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/src/database/db';
+import { parseSearchQuery } from '@/src/shared/utils/search';
 
 export interface SearchResult {
   type: 'surah' | 'hadith' | 'dua' | 'dhikr';
@@ -144,26 +145,45 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Search Hadiths (by text)
+    // 4. Search Hadiths (by text or hadith number)
     if (isAll || type === 'hadith') {
       const hadithLimit = type === 'hadith' ? 20 : 5;
-      const hadithRows = db
-        .prepare(
-          `SELECT h.id, h.hadith_number, h.text_en, h.collection_id, c.name as collection_name,
-                  (SELECT COUNT(*) FROM hadiths h2 WHERE h2.collection_id = h.collection_id AND h2.id < h.id) as rank
-           FROM hadiths h
-           JOIN hadith_collections c ON h.collection_id = c.id
-           WHERE LOWER(h.text_en) LIKE ? OR LOWER(h.text_arab) LIKE ?
-           LIMIT ?`
-        )
-        .all(searchTerm, searchTerm, hadithLimit) as {
+      
+      const { cleanQuery, isNumeric } = parseSearchQuery(query);
+
+      let hadithRows: {
         id: number;
         hadith_number: string;
         text_en: string;
         collection_id: string;
         collection_name: string;
         rank: number;
-      }[];
+      }[] = [];
+
+      if (isNumeric) {
+        hadithRows = db
+          .prepare(
+            `SELECT h.id, h.hadith_number, h.text_en, h.collection_id, c.name as collection_name,
+                    (SELECT COUNT(*) FROM hadiths h2 WHERE h2.collection_id = h.collection_id AND h2.id < h.id) as rank
+             FROM hadiths h
+             JOIN hadith_collections c ON h.collection_id = c.id
+             WHERE h.hadith_number = ? OR h.hadith_number LIKE ?
+             ORDER BY (h.hadith_number = ?) DESC, CAST(h.hadith_number AS INTEGER) ASC, h.id ASC
+             LIMIT ?`
+          )
+          .all(cleanQuery, cleanQuery + '%', cleanQuery, hadithLimit) as any[];
+      } else {
+        hadithRows = db
+          .prepare(
+            `SELECT h.id, h.hadith_number, h.text_en, h.collection_id, c.name as collection_name,
+                    (SELECT COUNT(*) FROM hadiths h2 WHERE h2.collection_id = h.collection_id AND h2.id < h.id) as rank
+             FROM hadiths h
+             JOIN hadith_collections c ON h.collection_id = c.id
+             WHERE LOWER(h.text_en) LIKE ? OR LOWER(h.text_arab) LIKE ?
+             LIMIT ?`
+          )
+          .all(searchTerm, searchTerm, hadithLimit) as any[];
+      }
 
       for (const h of hadithRows) {
         const snippet = h.text_en.length > 80 ? h.text_en.slice(0, 80) + '...' : h.text_en;
@@ -179,7 +199,11 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ results, query });
+    return NextResponse.json({ results, query }, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=300'
+      }
+    });
   } catch (err) {
     console.error('[Search API] Error:', err);
     return NextResponse.json({ error: 'Search failed' }, { status: 500 });
