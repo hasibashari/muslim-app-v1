@@ -53,6 +53,7 @@ export function PrayerAndCalendarWidgets() {
   const [currentTime, setCurrentTime] = useState("");
   const [hijriDate, setHijriDate] = useState("Memuat...");
   const [hijriYear, setHijriYear] = useState("");
+  const [gregorianDate, setGregorianDate] = useState("");
 
   // Default coordinates: Jakarta
   const [coords, setCoords] = useState({ latitude: -6.2088, longitude: 106.8456 });
@@ -122,6 +123,15 @@ export function PrayerAndCalendarWidgets() {
       const hijri = getFallbackHijri(displayDate);
       setHijriDate(`${hijri.day} ${HIJRI_MONTHS[hijri.month - 1]}`);
       setHijriYear(`${hijri.year} H`);
+
+      // Set Gregorian Date
+      const formatterGregorian = new Intl.DateTimeFormat("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+      setGregorianDate(formatterGregorian.format(now));
     };
 
     updateTimeAndDate();
@@ -202,20 +212,21 @@ export function PrayerAndCalendarWidgets() {
     return (
       <>
         {/* Skeleton for Prayer Widget */}
-        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[178px]">
+        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[190px]">
           <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
           <div className="h-3.5 w-24 bg-slate-100 rounded mb-2"></div>
-          <div className="h-6 w-16 bg-slate-200 rounded mb-2"></div>
+          <div className="h-5 w-16 bg-slate-200 rounded mb-2"></div>
           <div className="h-5 w-14 bg-slate-200 rounded-full mt-1"></div>
           <div className="h-3 w-20 bg-slate-100 rounded mt-3"></div>
         </div>
 
         {/* Skeleton for Hijri Widget */}
-        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[178px]">
+        <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[190px]">
           <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
           <div className="h-3.5 w-12 bg-slate-100 rounded mb-2"></div>
-          <div className="h-6 w-32 bg-slate-200 rounded mb-2"></div>
-          <div className="h-3 w-16 bg-slate-100 rounded mt-1.5"></div>
+          <div className="h-5 w-32 bg-slate-200 rounded mb-2"></div>
+          <div className="h-5 w-14 bg-slate-200 rounded-full mt-1"></div>
+          <div className="h-3 w-28 bg-slate-100 rounded mt-3"></div>
         </div>
       </>
     );
@@ -225,14 +236,14 @@ export function PrayerAndCalendarWidgets() {
     <>
       {/* Prayer Time Widget */}
       <div
-        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
+        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none min-h-[190px]"
         title={`Jadwal sholat hari ini untuk ${locationName}`}
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Clock size={20} />
         </div>
         <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Jadwal Sholat</p>
-        <p className="font-bold text-[#1A3A2A] text-lg mt-0.5">{nextPrayer.name}</p>
+        <p className="font-bold text-[#1A3A2A] text-base mt-0.5">{nextPrayer.name}</p>
         <p className="text-xs font-bold text-[#2D5A43] bg-[#F0F4F2] px-3 py-1 rounded-full mt-2 transition-all">
           {nextPrayer.time}
         </p>
@@ -249,15 +260,23 @@ export function PrayerAndCalendarWidgets() {
 
       {/* Hijri Calendar Widget */}
       <div
-        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none"
+        className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm hover:shadow-md hover:border-[#2D5A43]/30 transition-all select-none min-h-[190px]"
         title="Tanggal Hijriah hari ini"
       >
         <div className="w-10 h-10 rounded-full bg-[#F5F1EA] flex items-center justify-center text-[#2D5A43] mb-2">
           <Calendar size={20} />
         </div>
         <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijriah</p>
-        <p className="font-bold text-[#1A3A2A] text-sm mt-1 truncate max-w-full px-1">{hijriDate}</p>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">{hijriYear}</p>
+        <p className="font-bold text-[#1A3A2A] text-base mt-0.5 truncate max-w-full px-1">{hijriDate}</p>
+        <p className="text-xs font-bold text-[#8C6D3D] bg-[#FAF3E8] px-3 py-1 rounded-full mt-2 transition-all">
+          {hijriYear}
+        </p>
+
+        {/* Gregorian date matching location button height/structure */}
+        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 select-none">
+          <Calendar size={12} className="text-slate-400" />
+          <span>{gregorianDate}</span>
+        </div>
       </div>
 
       {/* Location Selector Modal Backdrop & Dialog */}

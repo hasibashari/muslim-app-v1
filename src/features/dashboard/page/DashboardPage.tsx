@@ -28,7 +28,7 @@ export default async function DashboardPage() {
       <HeroSection userName={userName} />
 
       {/* Feature Highlights */}
-      <div className="md:col-span-2 lg:col-span-4 grid grid-cols-2 gap-4 lg:h-full">
+      <div className="md:col-span-2 lg:col-span-5 grid grid-cols-2 gap-4 lg:h-full">
         <PrayerAndCalendarWidgets />
         <CurrentDhikrWidget allDhikrs={allDhikrs} />
       </div>
