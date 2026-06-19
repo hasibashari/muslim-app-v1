@@ -34,7 +34,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Feature Lists */}
-      <div className="md:col-span-1 lg:col-span-6 space-y-4">
+      <div className="md:col-span-1 lg:col-span-7 space-y-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-bold text-[#1A3A2A]">Recent Surahs</h3>
           <Link href="/quran" className="text-xs font-bold text-[#2D5A43] hover:underline">View All</Link>
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         <RecentSurahsList allSurahs={allSurahs} />
       </div>
 
-      <div className="md:col-span-1 lg:col-span-6">
+      <div className="md:col-span-1 lg:col-span-5">
         <TasbihWidget />
       </div>
     </div>

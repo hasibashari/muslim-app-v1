@@ -124,9 +124,8 @@ export function PrayerAndCalendarWidgets() {
       setHijriDate(`${hijri.day} ${HIJRI_MONTHS[hijri.month - 1]}`);
       setHijriYear(`${hijri.year} H`);
 
-      // Set Gregorian Date
+      // Set Gregorian Date (Without weekday for narrow screen spacing compatibility)
       const formatterGregorian = new Intl.DateTimeFormat("id-ID", {
-        weekday: "long",
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -214,19 +213,19 @@ export function PrayerAndCalendarWidgets() {
         {/* Skeleton for Prayer Widget */}
         <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[190px]">
           <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
-          <div className="h-3.5 w-24 bg-slate-100 rounded mb-2"></div>
-          <div className="h-5 w-16 bg-slate-200 rounded mb-2"></div>
-          <div className="h-5 w-14 bg-slate-200 rounded-full mt-1"></div>
-          <div className="h-3 w-20 bg-slate-100 rounded mt-3"></div>
+          <div className="h-3 w-20 bg-slate-100 rounded mb-2"></div>
+          <div className="h-4 md:h-5 w-16 bg-slate-200 rounded mb-2"></div>
+          <div className="h-4 w-12 bg-slate-200 rounded-full mt-1"></div>
+          <div className="h-2.5 w-16 bg-slate-100 rounded mt-3"></div>
         </div>
 
         {/* Skeleton for Hijri Widget */}
         <div className="bg-white border border-[#E9E3D8] p-5 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm animate-pulse min-h-[190px]">
           <div className="w-10 h-10 rounded-full bg-[#F5F1EA] mb-3"></div>
-          <div className="h-3.5 w-12 bg-slate-100 rounded mb-2"></div>
-          <div className="h-5 w-32 bg-slate-200 rounded mb-2"></div>
-          <div className="h-5 w-14 bg-slate-200 rounded-full mt-1"></div>
-          <div className="h-3 w-28 bg-slate-100 rounded mt-3"></div>
+          <div className="h-3 w-12 bg-slate-100 rounded mb-2"></div>
+          <div className="h-4 md:h-5 w-24 bg-slate-200 rounded mb-2"></div>
+          <div className="h-4 w-12 bg-slate-200 rounded-full mt-1"></div>
+          <div className="h-2.5 w-24 bg-slate-100 rounded mt-3"></div>
         </div>
       </>
     );
@@ -243,17 +242,17 @@ export function PrayerAndCalendarWidgets() {
           <Clock size={20} />
         </div>
         <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Jadwal Sholat</p>
-        <p className="font-bold text-[#1A3A2A] text-base mt-0.5">{nextPrayer.name}</p>
-        <p className="text-xs font-bold text-[#2D5A43] bg-[#F0F4F2] px-3 py-1 rounded-full mt-2 transition-all">
+        <p className="font-bold text-[#1A3A2A] text-sm md:text-base mt-0.5">{nextPrayer.name}</p>
+        <p className="text-[11px] md:text-xs font-bold text-[#2D5A43] bg-[#F0F4F2] px-3 py-1 rounded-full mt-2 transition-all">
           {nextPrayer.time}
         </p>
 
         {/* Location Switcher Trigger Button */}
         <button
           onClick={() => setShowSelector(true)}
-          className="flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-[#2D5A43] mt-3 transition-colors cursor-pointer bg-transparent border-none outline-none group"
+          className="flex items-center justify-center gap-1 text-[10px] md:text-[11px] font-semibold text-slate-500 hover:text-[#2D5A43] mt-3 transition-colors cursor-pointer bg-transparent border-none outline-none group"
         >
-          <MapPin size={12} className="text-[#2D5A43] group-hover:scale-110 transition-transform" />
+          <MapPin size={12} className="text-[#2D5A43] group-hover:scale-110 transition-transform shrink-0" />
           <span className="underline decoration-dotted underline-offset-2">{locationName}</span>
         </button>
       </div>
@@ -267,14 +266,14 @@ export function PrayerAndCalendarWidgets() {
           <Calendar size={20} />
         </div>
         <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hijriah</p>
-        <p className="font-bold text-[#1A3A2A] text-base mt-0.5 truncate max-w-full px-1">{hijriDate}</p>
-        <p className="text-xs font-bold text-[#8C6D3D] bg-[#FAF3E8] px-3 py-1 rounded-full mt-2 transition-all">
+        <p className="font-bold text-[#1A3A2A] text-sm md:text-base mt-0.5 px-1">{hijriDate}</p>
+        <p className="text-[11px] md:text-xs font-bold text-[#8C6D3D] bg-[#FAF3E8] px-3 py-1 rounded-full mt-2 transition-all">
           {hijriYear}
         </p>
 
         {/* Gregorian date matching location button height/structure */}
-        <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-400 mt-3 select-none">
-          <Calendar size={12} className="text-slate-400" />
+        <div className="flex items-center justify-center gap-1 text-[10px] md:text-[11px] font-semibold text-slate-400 mt-3 select-none">
+          <Calendar size={12} className="text-slate-400 shrink-0" />
           <span>{gregorianDate}</span>
         </div>
       </div>
@@ -334,11 +333,10 @@ export function PrayerAndCalendarWidgets() {
                 <button
                   key={city.name}
                   onClick={() => handleSelectCity(city)}
-                  className={`py-2 px-3 text-left text-xs rounded-xl border font-semibold transition-all cursor-pointer ${
-                    locationName === city.name
-                      ? "bg-[#2D5A43]/10 border-[#2D5A43] text-[#2D5A43]"
-                      : "bg-white border-[#E9E3D8] hover:border-[#2D5A43]/30 text-slate-700 hover:bg-slate-50/50"
-                  }`}
+                  className={`py-2 px-3 text-left text-xs rounded-xl border font-semibold transition-all cursor-pointer ${locationName === city.name
+                    ? "bg-[#2D5A43]/10 border-[#2D5A43] text-[#2D5A43]"
+                    : "bg-white border-[#E9E3D8] hover:border-[#2D5A43]/30 text-slate-700 hover:bg-slate-50/50"
+                    }`}
                 >
                   {city.name}
                 </button>
